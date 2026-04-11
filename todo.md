@@ -1,0 +1,23 @@
+# Project TODO — Laced Up Headless Storefront
+
+- [x] Midnight Luxe Sport dark theme with custom CSS variables
+- [x] Google Fonts: Plus Jakarta Sans (display), Inter (body), JetBrains Mono (prices)
+- [x] Hero section with editorial photography and animated text
+- [x] Trust bar with shipping, authenticity, returns, delivery icons
+- [x] Category grid with 4 categories (Footwear, Streetwear, Performance, Fan Gear)
+- [x] Featured products section (Trending Now) from Shopify API
+- [x] Editorial split section with footwear collection CTA
+- [x] Brand partners section
+- [x] Newsletter signup section
+- [x] Navbar with announcement bar, navigation links, search, cart icons
+- [x] Footer with brand info, quick links, categories, social links
+- [x] Collection page with sort and vendor filter
+- [x] Collections index page listing all Shopify collections
+- [x] Product detail page with image gallery, variants, pricing, affiliate CTA
+- [x] Search page with client-side filtering
+- [x] About page with brand story and affiliate disclosure
+- [x] ProductCard component with discount badges and affiliate indicators
+- [x] Shopify Admin API integration via tRPC server proxy
+- [x] SEO meta tags (OG, Twitter, canonical)
+- [x] Vitest tests for Shopify API connectivity
+- [x] SHOP_TOKEN environment variable configured
