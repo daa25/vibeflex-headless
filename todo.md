@@ -32,7 +32,7 @@
 - [x] Update editorial split section messaging for athletic focus
 - [x] Update About page copy for men's activewear positioning
 - [x] Update brand partners section to highlight athletic brands
-- [ ] Generate new hero imagery for men's athletic focus
+- [x] Generate new hero imagery for men's athletic focus
 - [x] Test all pages with filtered product set
 
 ## Remove "Partner" branding — make affiliate discreet

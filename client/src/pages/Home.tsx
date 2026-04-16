@@ -11,7 +11,7 @@ import ProductCard from "@/components/ProductCard";
 import { type ShopifyProduct } from "@/lib/shopify";
 import { trpc } from "@/lib/trpc";
 
-const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663485645033/SbCABGDP28y5zwW9QsdJLu/hero-main-jwGPCrqveTDaTdN9ZH66p9.webp";
+const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663485645033/SbCABGDP28y5zwW9QsdJLu/hero-mens-training-CPyzY3KCafQo7ib8gAWjfU.webp";
 const TRAINING_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663485645033/SbCABGDP28y5zwW9QsdJLu/hero-performance-BHAKq5p7sKAjoSwdMbb35q.webp";
 const ACTIVEWEAR_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663485645033/SbCABGDP28y5zwW9QsdJLu/hero-streetwear-jvG5oERfhzFgLQ6BS4FJuu.webp";
 const FOOTWEAR_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663485645033/SbCABGDP28y5zwW9QsdJLu/hero-footwear-jTrZ76YGezk7RFYTcSazan.webp";
