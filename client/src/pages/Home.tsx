@@ -1,10 +1,9 @@
 /**
  * Home Page — "Midnight Luxe Sport" Editorial Design
- * Sections: Hero, Category Grid, Featured Products, Editorial Split,
- *           Brand Partners, Newsletter, Trust Bar
+ * Men's / Boys' Activewear & Sporting Goods Focus
  */
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowRight, Truck, Shield, RotateCcw, Zap } from "lucide-react";
@@ -13,26 +12,46 @@ import { type ShopifyProduct } from "@/lib/shopify";
 import { trpc } from "@/lib/trpc";
 
 const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663485645033/SbCABGDP28y5zwW9QsdJLu/hero-main-jwGPCrqveTDaTdN9ZH66p9.webp";
+const TRAINING_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663485645033/SbCABGDP28y5zwW9QsdJLu/hero-performance-BHAKq5p7sKAjoSwdMbb35q.webp";
+const ACTIVEWEAR_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663485645033/SbCABGDP28y5zwW9QsdJLu/hero-streetwear-jvG5oERfhzFgLQ6BS4FJuu.webp";
 const FOOTWEAR_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663485645033/SbCABGDP28y5zwW9QsdJLu/hero-footwear-jTrZ76YGezk7RFYTcSazan.webp";
-const STREETWEAR_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663485645033/SbCABGDP28y5zwW9QsdJLu/hero-streetwear-jvG5oERfhzFgLQ6BS4FJuu.webp";
-const PERFORMANCE_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663485645033/SbCABGDP28y5zwW9QsdJLu/hero-performance-BHAKq5p7sKAjoSwdMbb35q.webp";
 
 const CATEGORIES = [
-  { title: "Footwear", subtitle: "Premium Kicks", href: "/collections/footwear", image: FOOTWEAR_IMG },
-  { title: "Streetwear", subtitle: "Urban Essentials", href: "/collections/streetwear", image: STREETWEAR_IMG },
-  { title: "Performance", subtitle: "Train Hard", href: "/collections/training-equipment", image: PERFORMANCE_IMG },
-  { title: "Fan Gear", subtitle: "Rep Your Team", href: "/collections/fan-gear", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&q=80" },
+  {
+    title: "Training & Equipment",
+    subtitle: "Build Strength",
+    href: "/collections/train",
+    image: TRAINING_IMG,
+  },
+  {
+    title: "Activewear",
+    subtitle: "Move Better",
+    href: "/collections/activewear",
+    image: ACTIVEWEAR_IMG,
+  },
+  {
+    title: "Footwear",
+    subtitle: "Premium Kicks",
+    href: "/collections/footwear",
+    image: FOOTWEAR_IMG,
+  },
+  {
+    title: "Fan Gear",
+    subtitle: "Rep Your Team",
+    href: "/collections/fan-gear",
+    image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&q=80",
+  },
 ];
 
 const TRUST_ITEMS = [
   { icon: Truck, label: "Free Shipping", desc: "On orders over $75" },
-  { icon: Shield, label: "Authentic Only", desc: "Verified partner brands" },
+  { icon: Shield, label: "Authentic Only", desc: "Top athletic brands" },
   { icon: RotateCcw, label: "Easy Returns", desc: "Hassle-free process" },
-  { icon: Zap, label: "Fast Delivery", desc: "2-5 business days" },
+  { icon: Zap, label: "Fast Delivery", desc: "2–5 business days" },
 ];
 
-const BRAND_PARTNERS = [
-  "Fanatics", "Angles90", "Baleaf", "Tru Grit", "Fofana",
+const BRANDS = [
+  "Adidas", "Baleaf", "Angles90", "Fanatics", "Gymshark", "Jordan", "ASICS",
 ];
 
 const fadeUp = {
@@ -45,7 +64,15 @@ const fadeUp = {
 };
 
 export default function Home() {
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+
   const { data: products, isLoading } = trpc.shopify.getProducts.useQuery({ limit: 12 });
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubscribed(true);
+  };
 
   return (
     <div className="min-h-screen">
@@ -54,53 +81,45 @@ export default function Home() {
         <div className="absolute inset-0">
           <img
             src={HERO_IMG}
-            alt="Premium athletic gear"
+            alt="Men's athletic gear"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </div>
         <div className="relative container h-full flex items-center">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            className="max-w-2xl"
-          >
-            <motion.span
-              variants={fadeUp}
-              custom={0}
-              className="label-caps inline-block mb-4"
-            >
-              Curated Athletic Commerce
+          <motion.div initial="hidden" animate="visible" className="max-w-2xl">
+            <motion.span variants={fadeUp} custom={0} className="label-caps inline-block mb-4">
+              Men's &amp; Boys' Athletic Gear
             </motion.span>
             <motion.h1
               variants={fadeUp}
               custom={1}
               className="font-display font-extrabold text-5xl md:text-7xl lg:text-8xl leading-[0.9] tracking-tight text-white mb-6"
             >
-              GEAR THAT<br />
-              <span className="text-primary">PERFORMS.</span>
+              BUILT TO<br />
+              <span className="text-primary">PERFORM.</span>
             </motion.h1>
             <motion.p
               variants={fadeUp}
               custom={2}
               className="text-lg md:text-xl text-white/70 max-w-lg mb-8 font-body leading-relaxed"
             >
-              Premium footwear, streetwear, and performance gear from the world's
-              top athletic brands — curated and delivered to your door.
+              Activewear, training equipment, and sporting goods for men, boys,
+              and athletes — curated from the top brands in the game.
             </motion.p>
             <motion.div variants={fadeUp} custom={3} className="flex flex-wrap gap-4">
               <Link
-                href="/collections/all"
+                href="/collections/activewear"
                 className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-lg font-display font-semibold text-sm tracking-wide hover:bg-primary/90 transition-colors"
               >
-                SHOP NOW <ArrowRight size={16} />
+                SHOP ACTIVEWEAR <ArrowRight size={16} />
               </Link>
               <Link
-                href="/collections/affiliate-deals"
+                href="/collections/train"
                 className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-lg font-display font-semibold text-sm tracking-wide hover:bg-white/20 transition-colors border border-white/20"
               >
-                VIEW DEALS
+                TRAINING GEAR
               </Link>
             </motion.div>
           </motion.div>
@@ -137,10 +156,10 @@ export default function Home() {
               </h2>
             </div>
             <Link
-              href="/collections/all"
+              href="/collections"
               className="hidden md:inline-flex items-center gap-1.5 text-sm text-primary font-medium hover:underline"
             >
-              View All <ArrowRight size={14} />
+              All Collections <ArrowRight size={14} />
             </Link>
           </div>
 
@@ -191,7 +210,7 @@ export default function Home() {
               </h2>
             </div>
             <Link
-              href="/collections/all"
+              href="/collections/new-arrivals"
               className="hidden md:inline-flex items-center gap-1.5 text-sm text-primary font-medium hover:underline"
             >
               View All <ArrowRight size={14} />
@@ -219,36 +238,36 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== EDITORIAL SPLIT ===== */}
+      {/* ===== EDITORIAL SPLIT — Training ===== */}
       <section className="py-20">
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-xl overflow-hidden">
             <div className="relative aspect-square lg:aspect-auto">
               <img
-                src={FOOTWEAR_IMG}
-                alt="Premium footwear collection"
+                src={TRAINING_IMG}
+                alt="Men's training gear"
                 loading="lazy"
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="bg-card p-10 md:p-16 flex flex-col justify-center">
-              <span className="label-caps block mb-4">The Collection</span>
+              <span className="label-caps block mb-4">Train Harder</span>
               <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-tight leading-tight mb-6">
-                STEP INTO<br />
-                <span className="text-primary">SOMETHING</span><br />
-                DIFFERENT.
+                GEAR BUILT<br />
+                FOR THE<br />
+                <span className="text-primary">GRIND.</span>
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-8 max-w-md">
-                We partner with the world's top athletic brands to bring you
-                authentic gear at the best prices. Every product is hand-selected
-                for quality, style, and performance.
+                From resistance bands to barbells, compression tights to
+                performance tees — everything a serious athlete needs to
+                train at their best, every single day.
               </p>
               <div>
                 <Link
-                  href="/collections/footwear"
+                  href="/collections/train"
                   className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-lg font-display font-semibold text-sm tracking-wide hover:bg-primary/90 transition-colors"
                 >
-                  EXPLORE FOOTWEAR <ArrowRight size={16} />
+                  SHOP TRAINING <ArrowRight size={16} />
                 </Link>
               </div>
             </div>
@@ -262,9 +281,9 @@ export default function Home() {
           <div className="container">
             <div className="flex items-end justify-between mb-10">
               <div>
-                <span className="label-caps block mb-2">More to Explore</span>
+                <span className="label-caps block mb-2">Just Dropped</span>
                 <h2 className="font-display font-extrabold text-3xl md:text-4xl tracking-tight">
-                  Just Dropped
+                  New Arrivals
                 </h2>
               </div>
             </div>
@@ -277,12 +296,12 @@ export default function Home() {
         </section>
       )}
 
-      {/* ===== BRAND PARTNERS ===== */}
+      {/* ===== BRANDS ===== */}
       <section className="py-16 border-y border-border">
         <div className="container">
-          <p className="label-caps text-center mb-8">Trusted Partner Brands</p>
+          <p className="label-caps text-center mb-8">Top Athletic Brands</p>
           <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
-            {BRAND_PARTNERS.map((brand) => (
+            {BRANDS.map((brand) => (
               <span
                 key={brand}
                 className="text-xl md:text-2xl font-display font-bold text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors tracking-tight"
@@ -300,35 +319,42 @@ export default function Home() {
           <div className="max-w-2xl mx-auto text-center">
             <span className="label-caps block mb-4">Stay in the Loop</span>
             <h2 className="font-display font-extrabold text-3xl md:text-4xl tracking-tight mb-4">
-              Get Early Access to Drops & Deals
+              New Drops. Exclusive Deals.
             </h2>
             <p className="text-muted-foreground mb-8">
-              Join the VibeFlex community for exclusive deals, new arrivals, and
-              curated picks delivered to your inbox.
+              Join the Laced Up community for new arrivals, training tips, and
+              athlete-curated picks delivered straight to your inbox.
             </p>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                alert("Thanks for subscribing!");
-              }}
-              className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-            >
-              <input
-                type="email"
-                placeholder="Enter your email"
-                required
-                className="flex-1 bg-secondary text-foreground px-5 py-3.5 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm placeholder:text-muted-foreground"
-              />
-              <button
-                type="submit"
-                className="bg-primary text-primary-foreground px-8 py-3.5 rounded-lg font-display font-semibold text-sm tracking-wide hover:bg-primary/90 transition-colors shrink-0"
+            {subscribed ? (
+              <p className="text-primary font-display font-semibold text-lg">
+                You're in. Welcome to the team.
+              </p>
+            ) : (
+              <form
+                onSubmit={handleSubscribe}
+                className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
               >
-                SUBSCRIBE
-              </button>
-            </form>
-            <p className="text-xs text-muted-foreground mt-4">
-              No spam. Unsubscribe anytime.
-            </p>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  className="flex-1 bg-secondary text-foreground px-5 py-3.5 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm placeholder:text-muted-foreground"
+                />
+                <button
+                  type="submit"
+                  className="bg-primary text-primary-foreground px-8 py-3.5 rounded-lg font-display font-semibold text-sm tracking-wide hover:bg-primary/90 transition-colors shrink-0"
+                >
+                  SUBSCRIBE
+                </button>
+              </form>
+            )}
+            {!subscribed && (
+              <p className="text-xs text-muted-foreground mt-4">
+                No spam. Unsubscribe anytime.
+              </p>
+            )}
           </div>
         </div>
       </section>

@@ -1,8 +1,7 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { ExternalLink } from "lucide-react";
 import type { ShopifyProduct } from "@/lib/shopify";
-import { formatPrice, getDiscount, isAffiliate } from "@/lib/shopify";
+import { formatPrice, getDiscount } from "@/lib/shopify";
 
 interface ProductCardProps {
   product: ShopifyProduct;
@@ -15,7 +14,6 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const price = variant?.price || "0";
   const compareAt = variant?.compare_at_price;
   const discount = getDiscount(price, compareAt);
-  const affiliate = isAffiliate(product);
 
   return (
     <motion.div
@@ -40,25 +38,20 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             </div>
           )}
 
-          {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-            {discount && (
+          {/* Discount badge only */}
+          {discount && (
+            <div className="absolute top-3 left-3">
               <span className="bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-0.5 rounded font-display tracking-wide">
                 -{discount}%
               </span>
-            )}
-            {affiliate && (
-              <span className="bg-primary/90 text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded font-display tracking-wide flex items-center gap-1">
-                <ExternalLink size={10} /> PARTNER
-              </span>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Hover overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
             <span className="inline-block bg-foreground text-background text-xs font-semibold px-4 py-2 rounded font-display tracking-wide w-full text-center">
-              {affiliate ? "VIEW DEAL" : "QUICK VIEW"}
+              SHOP NOW
             </span>
           </div>
         </div>

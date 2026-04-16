@@ -7,6 +7,31 @@ import { z } from "zod";
 const SHOP_DOMAIN = "fitforgeshop-33574-mc01z.myshopify.com";
 const ADMIN_TOKEN = process.env.SHOP_TOKEN || "";
 
+// ─── Vendors / product types to exclude from the storefront ─────────────────
+// Focus: Men's / Boys' activewear and sporting goods
+const EXCLUDED_VENDORS = new Set(["DHgate"]);
+
+const EXCLUDED_TYPE_PATTERNS = [
+  /women'?s/i,
+  /bath additives/i,
+  /home & garden/i,
+  /cosmetic bag/i,
+  /scarf/i,
+  /scarves/i,
+  /fashion accessories > hats, scarves/i,
+  /apparel > new fashion clothing/i,
+  /plus size/i,
+];
+
+function isMensRelevant(product: { vendor: string; product_type: string; tags: string }): boolean {
+  if (EXCLUDED_VENDORS.has(product.vendor)) return false;
+  const type = product.product_type || "";
+  for (const pattern of EXCLUDED_TYPE_PATTERNS) {
+    if (pattern.test(type)) return false;
+  }
+  return true;
+}
+
 async function shopifyFetch(endpoint: string, params: Record<string, string> = {}) {
   const url = new URL(`https://${SHOP_DOMAIN}/admin/api/2024-01/${endpoint}`);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
@@ -37,17 +62,25 @@ export const appRouter = router({
   }),
 
   shopify: router({
+    // Fetch active products, filtered to men's/boys' activewear & sporting goods
     getProducts: publicProcedure
-      .input(z.object({ limit: z.number().min(1).max(250).default(50) }))
+      .input(z.object({
+        limit: z.number().min(1).max(250).default(50),
+        page: z.number().min(1).default(1),
+      }))
       .query(async ({ input }) => {
+        // Fetch extra to account for filtered items
+        const fetchLimit = Math.min(input.limit * 3, 250);
         const data = await shopifyFetch("products.json", {
-          limit: String(input.limit),
+          limit: String(fetchLimit),
           status: "active",
           fields: "id,title,handle,body_html,vendor,product_type,tags,images,variants",
         });
-        return data.products;
+        const filtered = (data.products as any[]).filter(isMensRelevant);
+        return filtered.slice(0, input.limit);
       }),
 
+    // Fetch products in a specific collection, filtered
     getProductsByCollection: publicProcedure
       .input(z.object({
         collectionId: z.number(),
@@ -56,13 +89,15 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const data = await shopifyFetch("products.json", {
           collection_id: String(input.collectionId),
-          limit: String(input.limit),
+          limit: "250",
           status: "active",
           fields: "id,title,handle,body_html,vendor,product_type,tags,images,variants",
         });
-        return data.products;
+        const filtered = (data.products as any[]).filter(isMensRelevant);
+        return filtered.slice(0, input.limit);
       }),
 
+    // Fetch single product by handle (no filtering needed — direct lookup)
     getProductByHandle: publicProcedure
       .input(z.object({ handle: z.string() }))
       .query(async ({ input }) => {
@@ -74,6 +109,7 @@ export const appRouter = router({
         return data.products[0] || null;
       }),
 
+    // Fetch product metafields for affiliate URL resolution
     getProductMetafields: publicProcedure
       .input(z.object({ productId: z.number() }))
       .query(async ({ input }) => {
@@ -81,6 +117,7 @@ export const appRouter = router({
         return data.metafields || [];
       }),
 
+    // Smart collections (curated by Shopify rules)
     getSmartCollections: publicProcedure
       .input(z.object({ limit: z.number().min(1).max(250).default(50) }))
       .query(async ({ input }) => {
@@ -91,6 +128,7 @@ export const appRouter = router({
         return data.smart_collections || [];
       }),
 
+    // Custom collections (manually curated)
     getCustomCollections: publicProcedure
       .input(z.object({ limit: z.number().min(1).max(250).default(50) }))
       .query(async ({ input }) => {
@@ -101,16 +139,18 @@ export const appRouter = router({
         return data.custom_collections || [];
       }),
 
+    // Search products by title, filtered to men's/boys' focus
     searchProducts: publicProcedure
       .input(z.object({ query: z.string(), limit: z.number().min(1).max(50).default(20) }))
       .query(async ({ input }) => {
         const data = await shopifyFetch("products.json", {
           title: input.query,
-          limit: String(input.limit),
+          limit: "50",
           status: "active",
           fields: "id,title,handle,body_html,vendor,product_type,tags,images,variants",
         });
-        return data.products;
+        const filtered = (data.products as any[]).filter(isMensRelevant);
+        return filtered.slice(0, input.limit);
       }),
   }),
 });

@@ -21,3 +21,25 @@
 - [x] SEO meta tags (OG, Twitter, canonical)
 - [x] Vitest tests for Shopify API connectivity
 - [x] SHOP_TOKEN environment variable configured
+
+## Refocus: Men's/Boys' Activewear & Sporting Goods
+
+- [x] Audit Shopify catalog — identify product types, vendors, tags for filtering
+- [x] Update navigation categories to men's activewear focus (Training, Activewear, Footwear, Fan Gear, Recovery)
+- [x] Update hero section copy for men's/boys' athletic audience
+- [x] Update category grid images and labels for activewear/sporting goods
+- [x] Add server-side product filtering to exclude women's-only, fashion accessories, DHgate items
+- [x] Update editorial split section messaging for athletic focus
+- [x] Update About page copy for men's activewear positioning
+- [x] Update brand partners section to highlight athletic brands
+- [ ] Generate new hero imagery for men's athletic focus
+- [x] Test all pages with filtered product set
+
+## Remove "Partner" branding — make affiliate discreet
+
+- [x] Remove "PARTNER" badge from ProductCard component
+- [x] Remove "PARTNER DEAL" badge from ProductDetail page
+- [x] Change "VIEW DEAL" CTA to something neutral like "SHOP NOW"
+- [x] Remove prominent affiliate redirect warning on ProductDetail
+- [x] Replace with subtle "Sold by [retailer]" note on product page
+- [x] Keep affiliate disclosure only in footer/about page as matter-of-fact

@@ -4,30 +4,30 @@
 
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowLeft, ArrowRight, Target, Users, Globe, Shield } from "lucide-react";
+import { ArrowLeft, ArrowRight, Target, Users, Dumbbell, Shield } from "lucide-react";
 
-const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663485645033/SbCABGDP28y5zwW9QsdJLu/hero-streetwear-jvG5oERfhzFgLQ6BS4FJuu.webp";
+const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663485645033/SbCABGDP28y5zwW9QsdJLu/hero-performance-BHAKq5p7sKAjoSwdMbb35q.webp";
 
 const VALUES = [
   {
     icon: Target,
-    title: "Curated Selection",
-    description: "Every product is hand-picked from trusted athletic brands. We don't carry everything — just the best.",
+    title: "Curated for Athletes",
+    description: "Every product is selected for performance, quality, and value. We focus on what men and boys actually need to train, compete, and perform.",
+  },
+  {
+    icon: Dumbbell,
+    title: "Built for the Game",
+    description: "From the weight room to the field, the court to the track — we carry gear for every sport and every level of athlete.",
   },
   {
     icon: Users,
     title: "Community First",
-    description: "Built by athletes and sneakerheads who understand what gear matters and why quality counts.",
-  },
-  {
-    icon: Globe,
-    title: "Global Brands",
-    description: "We partner with world-class brands like Fanatics, Angles90, and more to bring you authentic products.",
+    description: "Built by athletes who understand what gear matters. We keep the catalog focused so you spend less time searching and more time training.",
   },
   {
     icon: Shield,
-    title: "Trust & Transparency",
-    description: "We're upfront about our affiliate partnerships. You get the best deals, and we earn a small commission.",
+    title: "Authentic Products",
+    description: "Every brand in our catalog is verified. No knockoffs, no fakes — just the real thing from the brands you know and trust.",
   },
 ];
 
@@ -61,25 +61,26 @@ export default function About() {
             >
               <span className="label-caps block mb-4">Our Story</span>
               <h2 className="font-display font-extrabold text-3xl md:text-5xl tracking-tight leading-tight mb-6">
-                WHERE SPORT<br />
-                MEETS <span className="text-primary">STYLE.</span>
+                GEAR FOR<br />
+                <span className="text-primary">ATHLETES.</span>
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-6">
-                Laced Up by VibeFlex Sports is a curated athletic commerce platform
-                that connects you with the world's best sports and streetwear brands.
-                We don't just sell products — we curate experiences.
+                Laced Up by VibeFlex Sports is a curated athletic storefront built
+                for men, boys, and serious athletes. We cut through the noise and
+                bring you the activewear, training equipment, and sporting goods
+                that actually perform.
               </p>
               <p className="text-muted-foreground leading-relaxed mb-8">
-                From premium sneakers to performance training gear, every item in our
-                catalog has been hand-selected for quality, authenticity, and value.
-                We partner with leading retailers through affiliate programs to bring
-                you the best deals without the markup.
+                Whether you're training for a sport, staying active, or repping
+                your team — we've got the gear. Every product in our catalog is
+                hand-selected from top athletic brands for quality, authenticity,
+                and value.
               </p>
               <Link
-                href="/collections/all"
+                href="/collections/activewear"
                 className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-lg font-display font-semibold text-sm tracking-wide hover:bg-primary/90 transition-colors"
               >
-                EXPLORE THE COLLECTION <ArrowRight size={16} />
+                SHOP THE COLLECTION <ArrowRight size={16} />
               </Link>
             </motion.div>
             <motion.div
@@ -90,7 +91,7 @@ export default function About() {
             >
               <img
                 src={HERO_IMG}
-                alt="VibeFlex Sports streetwear collection"
+                alt="Men's athletic training gear"
                 className="w-full h-full object-cover"
               />
             </motion.div>
@@ -128,38 +129,26 @@ export default function About() {
         </div>
       </section>
 
-      {/* Affiliate Disclosure */}
-      <section className="py-20">
+      {/* Disclosure — matter-of-fact, not prominent */}
+      <section className="py-16">
         <div className="container max-w-3xl">
-          <span className="label-caps block mb-2">Transparency</span>
-          <h2 className="font-display font-extrabold text-3xl md:text-4xl tracking-tight mb-6">
-            Affiliate Disclosure
+          <h2 className="font-display font-bold text-xl mb-4 text-foreground">
+            Disclosure
           </h2>
-          <div className="space-y-4 text-muted-foreground leading-relaxed">
+          <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
             <p>
-              Laced Up by VibeFlex Sports participates in affiliate programs with
-              various athletic and sports brands, including but not limited to
-              Fanatics, Angles90, Baleaf, Tru Grit Fitness, and others.
+              Laced Up by VibeFlex Sports works with select athletic brands and
+              retailers through affiliate programs. When you click a product link
+              and make a purchase on a retailer's site, we may earn a commission
+              at no additional cost to you.
             </p>
             <p>
-              When you click on a product link and make a purchase on a partner
-              retailer's website, we may earn a small commission at no additional
-              cost to you. This commission helps us maintain the platform, curate
-              new products, and continue providing you with the best deals.
+              Our product selection is based on quality and relevance to our
+              audience — not commission rates. We only carry brands we'd
+              actually recommend.
             </p>
             <p>
-              All affiliate links are clearly marked with a "Partner Deal" badge
-              and the "View Deal" call-to-action button. These links will redirect
-              you to the partner retailer's website where you can complete your
-              purchase directly.
-            </p>
-            <p>
-              We only partner with brands and retailers that meet our quality
-              standards. Our product recommendations are based on genuine curation,
-              not commission rates. Your trust is our most valuable asset.
-            </p>
-            <p className="text-sm">
-              For questions about our affiliate partnerships, please contact us at{" "}
+              Questions? Reach us at{" "}
               <a href="mailto:support@vibeflexsports.com" className="text-primary hover:underline">
                 support@vibeflexsports.com
               </a>

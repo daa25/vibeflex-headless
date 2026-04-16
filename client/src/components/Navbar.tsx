@@ -4,12 +4,12 @@ import { Search, ShoppingBag, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const NAV_LINKS = [
-  { label: "New Arrivals", href: "/collections/all" },
+  { label: "New Arrivals", href: "/collections/new-arrivals" },
+  { label: "Training", href: "/collections/train" },
+  { label: "Activewear", href: "/collections/activewear" },
   { label: "Footwear", href: "/collections/footwear" },
-  { label: "Streetwear", href: "/collections/streetwear" },
-  { label: "Performance", href: "/collections/training-equipment" },
   { label: "Fan Gear", href: "/collections/fan-gear" },
-  { label: "Deals", href: "/collections/affiliate-deals" },
+  { label: "Recovery", href: "/collections/recovery-smart" },
 ];
 
 export default function Navbar() {
@@ -32,7 +32,7 @@ export default function Navbar() {
       {/* Announcement Bar */}
       <div className="bg-primary text-primary-foreground text-center py-2 px-4">
         <p className="text-xs font-medium tracking-wide font-display">
-          FREE SHIPPING ON ORDERS OVER $75 — CURATED FROM THE WORLD'S BEST BRANDS
+          FREE SHIPPING ON ORDERS OVER $75 — BUILT FOR ATHLETES, WORN BY CHAMPIONS
         </p>
       </div>
 
@@ -107,7 +107,7 @@ export default function Navbar() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search footwear, gear, and more..."
+                    placeholder="Search training gear, activewear, footwear..."
                     className="w-full bg-secondary text-foreground pl-12 pr-4 py-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body text-sm placeholder:text-muted-foreground"
                     autoFocus
                   />

@@ -2,15 +2,15 @@ import { Link } from "wouter";
 
 const FOOTER_LINKS = {
   Shop: [
-    { label: "New Arrivals", href: "/collections/all" },
+    { label: "New Arrivals", href: "/collections/new-arrivals" },
+    { label: "Training & Equipment", href: "/collections/train" },
+    { label: "Activewear", href: "/collections/activewear" },
     { label: "Footwear", href: "/collections/footwear" },
-    { label: "Streetwear", href: "/collections/streetwear" },
-    { label: "Performance", href: "/collections/training-equipment" },
     { label: "Fan Gear", href: "/collections/fan-gear" },
+    { label: "Recovery", href: "/collections/recovery-smart" },
   ],
   Company: [
     { label: "About Us", href: "/about" },
-    { label: "Affiliate Disclosure", href: "/affiliate-disclosure" },
     { label: "Contact", href: "/contact" },
   ],
   Support: [
@@ -33,7 +33,7 @@ export default function Footer() {
               LACED<span className="text-primary">UP</span>
             </span>
             <p className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-xs">
-              Premium athletic footwear, streetwear, and performance gear — curated from the world's best brands.
+              Activewear, training equipment, and sporting goods for men, boys, and athletes — curated from top athletic brands.
             </p>
             <p className="label-caps text-muted-foreground">
               By VibeFlex Sports
@@ -66,8 +66,8 @@ export default function Footer() {
           <p className="text-xs text-muted-foreground">
             &copy; {new Date().getFullYear()} Laced Up by VibeFlex Sports. All rights reserved.
           </p>
-          <p className="text-xs text-muted-foreground">
-            Affiliate products link to partner retailers. We may earn a commission on qualifying purchases.
+          <p className="text-xs text-muted-foreground/60">
+            Some products are sold by third-party retailers. We may earn a commission on purchases.
           </p>
         </div>
       </div>

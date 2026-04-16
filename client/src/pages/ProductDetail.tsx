@@ -1,12 +1,12 @@
 /**
  * Product Detail Page — /products/:handle
- * Shows product images, variants, pricing, affiliate CTA, and related products
+ * Shows product images, variants, pricing, and related products
  */
 
 import { useState, useMemo } from "react";
 import { useParams, Link } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowLeft, ExternalLink, Shield, Truck, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { ExternalLink, Shield, Truck, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import {
   getAffiliateUrl,
@@ -24,19 +24,16 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(0);
 
-  // Fetch product by handle
   const { data: product, isLoading: loadingProduct } = trpc.shopify.getProductByHandle.useQuery(
     { handle },
     { enabled: !!handle }
   );
 
-  // Fetch metafields for affiliate URL
   const { data: metafields } = trpc.shopify.getProductMetafields.useQuery(
     { productId: product?.id || 0 },
     { enabled: !!product?.id }
   );
 
-  // Fetch related products
   const { data: allProducts } = trpc.shopify.getProducts.useQuery(
     { limit: 20 },
     { enabled: !!product }
@@ -53,6 +50,8 @@ export default function ProductDetail() {
       .filter((rp: ShopifyProduct) => rp.id !== product.id && (rp.product_type === product.product_type || rp.vendor === product.vendor))
       .slice(0, 4);
   }, [product, allProducts]);
+
+  const affiliate = product ? (isAffiliate(product) || !!affiliateUrl) : false;
 
   if (loadingProduct) {
     return (
@@ -91,7 +90,6 @@ export default function ProductDetail() {
   const price = variant?.price || "0";
   const compareAt = variant?.compare_at_price;
   const discount = getDiscount(price, compareAt);
-  const affiliate = isAffiliate(product) || !!affiliateUrl;
   const images = product.images || [];
 
   const prevImage = () => setSelectedImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -135,19 +133,14 @@ export default function ProductDetail() {
                   </div>
                 )}
 
-                {/* Badges */}
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
-                  {discount && (
+                {/* Discount badge only */}
+                {discount && (
+                  <div className="absolute top-4 left-4">
                     <span className="bg-destructive text-destructive-foreground text-xs font-bold px-3 py-1 rounded font-display">
                       -{discount}% OFF
                     </span>
-                  )}
-                  {affiliate && (
-                    <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded font-display flex items-center gap-1">
-                      <ExternalLink size={12} /> PARTNER DEAL
-                    </span>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 {/* Nav arrows */}
                 {images.length > 1 && (
@@ -237,7 +230,7 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {/* CTA */}
+              {/* CTA — uniform "SHOP NOW" for all products */}
               <div className="mb-8">
                 {affiliate && affiliateUrl ? (
                   <a
@@ -246,16 +239,17 @@ export default function ProductDetail() {
                     rel="nofollow noopener noreferrer"
                     className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-10 py-4 rounded-lg font-display font-bold text-base tracking-wide hover:bg-primary/90 transition-colors w-full justify-center sm:w-auto"
                   >
-                    VIEW DEAL <ExternalLink size={18} />
+                    SHOP NOW <ExternalLink size={16} />
                   </a>
                 ) : (
                   <button className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-10 py-4 rounded-lg font-display font-bold text-base tracking-wide hover:bg-primary/90 transition-colors w-full sm:w-auto justify-center">
                     ADD TO CART
                   </button>
                 )}
+                {/* Subtle sold-by note for affiliate products */}
                 {affiliate && (
-                  <p className="text-xs text-muted-foreground mt-3">
-                    This is a partner product. You'll be redirected to the retailer's site to complete your purchase.
+                  <p className="text-xs text-muted-foreground/70 mt-2">
+                    Sold by {product.vendor}. You'll complete your purchase on their site.
                   </p>
                 )}
               </div>
@@ -287,19 +281,22 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {/* Tags */}
+              {/* Tags — show clean tags, skip internal ones */}
               {product.tags && (
                 <div>
                   <h3 className="font-display font-bold text-sm mb-2">Tags</h3>
                   <div className="flex flex-wrap gap-2">
-                    {product.tags.split(",").map((tag: string) => (
-                      <span
-                        key={tag.trim()}
-                        className="text-xs bg-secondary text-muted-foreground px-3 py-1 rounded-full"
-                      >
-                        {tag.trim()}
-                      </span>
-                    ))}
+                    {product.tags.split(",")
+                      .map((tag: string) => tag.trim())
+                      .filter((tag: string) => !tag.startsWith("source:") && !tag.startsWith("catalog:") && !tag.startsWith("brand:") && !tag.startsWith("imported-by") && tag !== "affiliate")
+                      .map((tag: string) => (
+                        <span
+                          key={tag}
+                          className="text-xs bg-secondary text-muted-foreground px-3 py-1 rounded-full"
+                        >
+                          {tag}
+                        </span>
+                      ))}
                   </div>
                 </div>
               )}
