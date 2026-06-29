@@ -5,11 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const NAV_LINKS = [
   { label: "New Arrivals", href: "/collections/new-arrivals" },
-  { label: "Training", href: "/collections/train" },
-  { label: "Activewear", href: "/collections/activewear" },
-  { label: "Footwear", href: "/collections/footwear" },
+  { label: "Training", href: "/collections/training-gear" },
+  { label: "Activewear", href: "/collections/performance-apparel" },
+  { label: "Footwear", href: "/collections/best-sellers" },
   { label: "Fan Gear", href: "/collections/fan-gear" },
-  { label: "Recovery", href: "/collections/recovery-smart" },
+  { label: "Recovery", href: "/collections/uncooked" },
 ];
 
 export default function Navbar() {

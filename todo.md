@@ -43,3 +43,111 @@
 - [x] Remove prominent affiliate redirect warning on ProductDetail
 - [x] Replace with subtle "Sold by [retailer]" note on product page
 - [x] Keep affiliate disclosure only in footer/about page as matter-of-fact
+
+
+## PHASE 1: Final Catalog Audit
+
+- [ ] Verify every published product has real image
+- [ ] Verify every published product has valid title
+- [ ] Verify every published product has useful description
+- [ ] Verify every published product has variants where appropriate
+- [ ] Verify every published product has price
+- [ ] Verify every published product belongs to correct collection
+- [ ] Verify every published product has correct tags
+- [ ] Verify every published product has working Add to Cart
+- [ ] Verify every published product has working Checkout
+- [ ] Verify no broken images across all products
+- [ ] Verify no duplicate products
+- [ ] Archive low-quality products (do not delete)
+
+## PHASE 2: Curate 12 Collections
+
+- [ ] Finalize VibeFlex Originals collection
+- [ ] Finalize Best Sellers collection
+- [ ] Finalize Fan Gear collection
+- [ ] Finalize NFL collection
+- [ ] Finalize NBA collection
+- [ ] Finalize MLB collection
+- [ ] Finalize Soccer collection
+- [ ] Finalize Training Gear collection
+- [ ] Finalize Accessories collection
+- [ ] Finalize Digital Products collection
+- [ ] Finalize UNCOOKED collection
+- [ ] Finalize The 490 Movement collection
+- [ ] Verify no empty collections
+- [ ] Verify no filler products in collections
+- [ ] Verify no duplicates in collections
+
+## PHASE 3: Manually Curate Best Sellers
+
+- [ ] Add Built Different to Best Sellers
+- [ ] Add Earned Not Given to Best Sellers
+- [ ] Add Rise Above to Best Sellers
+- [ ] Add Stay Ready to Best Sellers
+- [ ] Add Relentless to Best Sellers
+- [ ] Add UNCOOKED to Best Sellers
+- [ ] Add 490 Movement to Best Sellers
+- [ ] Add highest-quality affiliate products to Best Sellers
+- [ ] Verify intentional curation (not random ordering)
+
+## PHASE 4: Enhance VibeFlex Originals Product Data
+
+- [ ] Update titles for premium athletic branding
+- [ ] Update descriptions for premium athletic branding
+- [ ] Add feature bullets to all VibeFlex Originals
+- [ ] Write SEO titles for all VibeFlex Originals
+- [ ] Write meta descriptions for all VibeFlex Originals
+- [ ] Update tags for all VibeFlex Originals
+- [ ] Add product recommendations for all VibeFlex Originals
+- [ ] Add related products for all VibeFlex Originals
+
+## PHASE 5: Visual Polish and QA
+
+- [ ] Verify homepage renders correctly
+- [ ] Verify collections render correctly
+- [ ] Verify product pages render correctly
+- [ ] Verify cart renders correctly
+- [ ] Verify checkout loads correctly
+- [ ] Verify no stretched images
+- [ ] Verify no placeholder images
+- [ ] Verify no broken images
+- [ ] Verify no empty product cards
+- [ ] Verify no dead links
+- [ ] Verify no broken buttons
+- [ ] Verify consistent spacing
+- [ ] Verify premium typography
+- [ ] Verify premium product presentation
+- [ ] Test on mobile
+- [ ] Test on desktop
+
+## PHASE 6: Shopify Health Verification
+
+- [ ] Verify Shopify products sync correctly
+- [ ] Verify Impact products display correctly
+- [ ] Verify Gelato products display correctly
+- [ ] Verify collections populate correctly
+- [ ] Verify search works
+- [ ] Verify filters work
+- [ ] Verify navigation works
+- [ ] Verify footer works
+- [ ] Verify policies work
+- [ ] Verify contact page works
+
+## PHASE 7: SEO Validation
+
+- [ ] Verify every product has SEO title
+- [ ] Verify every product has meta description
+- [ ] Verify every product has canonical URL
+- [ ] Verify every product has alt text
+- [ ] Verify every product has clean URL
+- [ ] Verify every collection has SEO title
+- [ ] Verify every collection has meta description
+- [ ] Verify every collection has canonical URL
+- [ ] Verify no placeholder SEO
+
+## PHASE 8: Final Launch QA and Report
+
+- [ ] Complete customer journey on desktop: Home → Collection → Product → Add to Cart → Cart → Checkout
+- [ ] Complete customer journey on mobile: Home → Collection → Product → Add to Cart → Cart → Checkout
+- [ ] Verify Shopify checkout loads correctly
+- [ ] Generate final status report

@@ -83,17 +83,35 @@ export const appRouter = router({
     // Fetch products in a specific collection, filtered
     getProductsByCollection: publicProcedure
       .input(z.object({
-        collectionId: z.number(),
+        collectionId: z.number().int().positive(),
         limit: z.number().min(1).max(250).default(50),
       }))
       .query(async ({ input }) => {
-        const data = await shopifyFetch("products.json", {
+        // Step 1: Get product IDs in the collection using Collects API
+        const collectsData = await shopifyFetch("collects.json", {
           collection_id: String(input.collectionId),
+          limit: "250",
+          fields: "product_id",
+        });
+        
+        const productIds = (collectsData.collects as any[]).map((c: any) => c.product_id);
+        
+        if (productIds.length === 0) {
+          return [];
+        }
+        
+        // Step 2: Fetch the actual products
+        const data = await shopifyFetch("products.json", {
           limit: "250",
           status: "active",
           fields: "id,title,handle,body_html,vendor,product_type,tags,images,variants",
         });
-        const filtered = (data.products as any[]).filter(isMensRelevant);
+        
+        // Step 3: Filter to only include products in the collection and apply men's relevance filter
+        const filtered = (data.products as any[])
+          .filter((p: any) => productIds.includes(p.id))
+          .filter(isMensRelevant);
+        
         return filtered.slice(0, input.limit);
       }),
 

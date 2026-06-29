@@ -3,7 +3,7 @@
  * Supports: /collections/:handle
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useParams, Link } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowLeft, SlidersHorizontal, ChevronDown } from "lucide-react";
@@ -36,7 +36,15 @@ export default function Collection() {
     ...(customCollections || []),
   ], [smartCollections, customCollections]);
 
-  const currentCollection = allCollections.find((c: any) => c.handle === handle);
+  // Wrap currentCollection in useMemo to recalculate when allCollections changes
+  const currentCollection = useMemo(() => {
+    if (!allCollections || allCollections.length === 0) return undefined;
+    const found = allCollections.find((c: any) => c.handle === handle);
+    if (handle !== 'all') {
+      console.log(`[Collection] Looking for handle: ${handle}, found: ${found?.title || 'NOT FOUND'}, total: ${allCollections.length}`);
+    }
+    return found;
+  }, [allCollections, handle]);
 
   // Fetch products — either by collection or all
   const { data: allProducts, isLoading: loadingAll } = trpc.shopify.getProducts.useQuery(
@@ -44,10 +52,21 @@ export default function Collection() {
     { enabled: handle === "all" || !currentCollection }
   );
 
+  // Only query for products if we have a valid collection ID (not 0)
   const { data: collectionProducts, isLoading: loadingCollection } = trpc.shopify.getProductsByCollection.useQuery(
     { collectionId: currentCollection?.id || 0, limit: 50 },
-    { enabled: !!currentCollection && handle !== "all" }
+    { enabled: !!currentCollection && handle !== "all" && (currentCollection?.id || 0) > 0 }
   );
+  
+  useEffect(() => {
+    console.log(`[Collection] State:`, {
+      handle,
+      currentCollection: currentCollection?.title,
+      collectionProducts: collectionProducts?.length || 0,
+      loadingCollection,
+      allCollections: allCollections.length
+    });
+  }, [currentCollection, collectionProducts, loadingCollection, allCollections, handle])
 
   const products: ShopifyProduct[] = (handle === "all" || !currentCollection) ? (allProducts || []) : (collectionProducts || []);
   const loading = (handle === "all" || !currentCollection) ? loadingAll : loadingCollection;
