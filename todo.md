@@ -47,6 +47,15 @@
 
 ## PHASE 1: Final Catalog Audit
 
+**Status: BLOCKER - Environment Variable Issue**
+- [x] Identified root cause: tRPC query parameter parsing broken → FIXED
+- [x] Fixed tRPC input validation by making parameters optional
+- [x] Fixed navbar routes to match Shopify collection handles  
+- [x] Implemented Collects API for proper collection product fetching
+- [ ] BLOCKER: SHOP_TOKEN environment variable not injected into server process
+- [ ] Debug and fix environment variable injection
+- [ ] Verify collection pages display products correctly
+
 - [ ] Verify every published product has real image
 - [ ] Verify every published product has valid title
 - [ ] Verify every published product has useful description

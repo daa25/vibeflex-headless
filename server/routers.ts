@@ -7,6 +7,11 @@ import { z } from "zod";
 const SHOP_DOMAIN = "fitforgeshop-33574-mc01z.myshopify.com";
 const ADMIN_TOKEN = process.env.SHOP_TOKEN || "";
 
+if (!ADMIN_TOKEN) {
+  console.error('[ERROR] SHOP_TOKEN environment variable is not set!');
+  console.error('[DEBUG] Available env vars:', Object.keys(process.env).filter(k => k.includes('SHOP') || k.includes('TOKEN')).join(', '));
+}
+
 // ─── Vendors / product types to exclude from the storefront ─────────────────
 // Focus: Men's / Boys' activewear and sporting goods
 const EXCLUDED_VENDORS = new Set(["DHgate"]);
@@ -67,17 +72,18 @@ export const appRouter = router({
       .input(z.object({
         limit: z.number().min(1).max(250).default(50),
         page: z.number().min(1).default(1),
-      }))
+      }).optional())
       .query(async ({ input }) => {
         // Fetch extra to account for filtered items
-        const fetchLimit = Math.min(input.limit * 3, 250);
+        const limit = input?.limit || 50;
+        const fetchLimit = Math.min(limit * 3, 250);
         const data = await shopifyFetch("products.json", {
           limit: String(fetchLimit),
           status: "active",
           fields: "id,title,handle,body_html,vendor,product_type,tags,images,variants",
         });
         const filtered = (data.products as any[]).filter(isMensRelevant);
-        return filtered.slice(0, input.limit);
+        return filtered.slice(0, limit);
       }),
 
     // Fetch products in a specific collection, filtered
@@ -85,11 +91,13 @@ export const appRouter = router({
       .input(z.object({
         collectionId: z.number().int().positive(),
         limit: z.number().min(1).max(250).default(50),
-      }))
+      }).optional())
       .query(async ({ input }) => {
+        const collectionId = input?.collectionId || 0;
+        const limit = input?.limit || 50;
         // Step 1: Get product IDs in the collection using Collects API
         const collectsData = await shopifyFetch("collects.json", {
-          collection_id: String(input.collectionId),
+          collection_id: String(collectionId),
           limit: "250",
           fields: "product_id",
         });
@@ -112,7 +120,7 @@ export const appRouter = router({
           .filter((p: any) => productIds.includes(p.id))
           .filter(isMensRelevant);
         
-        return filtered.slice(0, input.limit);
+        return filtered.slice(0, limit);
       }),
 
     // Fetch single product by handle (no filtering needed — direct lookup)
@@ -137,10 +145,11 @@ export const appRouter = router({
 
     // Smart collections (curated by Shopify rules)
     getSmartCollections: publicProcedure
-      .input(z.object({ limit: z.number().min(1).max(250).default(50) }))
+      .input(z.object({ limit: z.number().min(1).max(250).default(50) }).optional())
       .query(async ({ input }) => {
+        const limit = input?.limit || 50;
         const data = await shopifyFetch("smart_collections.json", {
-          limit: String(input.limit),
+          limit: String(limit),
           fields: "id,title,handle,body_html,image",
         });
         return data.smart_collections || [];
@@ -148,10 +157,11 @@ export const appRouter = router({
 
     // Custom collections (manually curated)
     getCustomCollections: publicProcedure
-      .input(z.object({ limit: z.number().min(1).max(250).default(50) }))
+      .input(z.object({ limit: z.number().min(1).max(250).default(50) }).optional())
       .query(async ({ input }) => {
+        const limit = input?.limit || 50;
         const data = await shopifyFetch("custom_collections.json", {
-          limit: String(input.limit),
+          limit: String(limit),
           fields: "id,title,handle,body_html,image",
         });
         return data.custom_collections || [];
