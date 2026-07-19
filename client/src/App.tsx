@@ -12,6 +12,9 @@ import Collections from "@/pages/Collections";
 import ProductDetail from "@/pages/ProductDetail";
 import Search from "@/pages/Search";
 import About from "@/pages/About";
+import Community from "@/pages/Community";
+import Ambassador from "@/pages/Ambassador";
+import Contact from "@/pages/Contact";
 
 function Router() {
   return (
@@ -22,8 +25,10 @@ function Router() {
       <Route path="/products/:handle" component={ProductDetail} />
       <Route path="/search" component={Search} />
       <Route path="/about" component={About} />
+      <Route path="/community" component={Community} />
+      <Route path="/ambassador" component={Ambassador} />
+      <Route path="/contact" component={Contact} />
       <Route path="/affiliate-disclosure" component={About} />
-      <Route path="/contact" component={About} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -36,7 +41,7 @@ function App() {
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <Toaster />
-          <div className="flex flex-col min-h-screen bg-background text-foreground">
+          <div className="flex min-h-screen flex-col bg-background text-foreground">
             <Navbar />
             <main className="flex-1">
               <Router />
