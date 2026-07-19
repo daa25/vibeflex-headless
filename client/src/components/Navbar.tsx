@@ -4,12 +4,17 @@ import { Search, ShoppingBag, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const NAV_LINKS = [
-  { label: "New Arrivals", href: "/collections/new-arrivals" },
-  { label: "Training", href: "/collections/training-gear" },
-  { label: "Activewear", href: "/collections/performance-apparel" },
-  { label: "Footwear", href: "/collections/best-sellers" },
-  { label: "Fan Gear", href: "/collections/fan-gear" },
-  { label: "Recovery", href: "/collections/uncooked" },
+  { label: "#UNCOOKED", href: "/collections/uncooked" },
+  { label: "490 Movement", href: "/collections/490-movement" },
+  { label: "Stay Ready", href: "/collections/stay-ready" },
+  { label: "Lock Down", href: "/collections/lock-down" },
+  { label: "Relentless", href: "/collections/relentless" },
+];
+
+const COMMUNITY_LINKS = [
+  { label: "Athlete Community", href: "/community" },
+  { label: "Ambassador Program", href: "/ambassador" },
+  { label: "Our Story", href: "/about" },
 ];
 
 export default function Navbar() {
@@ -18,97 +23,107 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`;
-      setSearchOpen(false);
-      setSearchQuery("");
-    }
+  const handleSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    if (!query) return;
+
+    window.location.href = `/search?q=${encodeURIComponent(query)}`;
+    setSearchOpen(false);
+    setSearchQuery("");
   };
+
+  const isActive = (href: string) => location.startsWith(href);
 
   return (
     <>
-      {/* Announcement Bar */}
-      <div className="bg-primary text-primary-foreground text-center py-2 px-4">
-        <p className="text-xs font-medium tracking-wide font-display">
-          FREE SHIPPING ON ORDERS OVER $75 — BUILT FOR ATHLETES, WORN BY CHAMPIONS
+      <div className="bg-primary px-4 py-2 text-center text-primary-foreground">
+        <p className="font-display text-[11px] font-semibold tracking-[0.18em] sm:text-xs">
+          FREE SHIPPING OVER $75 · BUILT DIFFERENT · STAY READY
         </p>
       </div>
 
-      {/* Main Nav */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
-        <div className="container flex items-center justify-between h-16">
-          {/* Mobile Menu Toggle */}
+      <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-xl">
+        <div className="container flex h-16 items-center justify-between gap-5">
           <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 -ml-2 text-foreground/70 hover:text-foreground transition-colors"
-            aria-label="Toggle menu"
+            type="button"
+            onClick={() => setMobileOpen((open) => !open)}
+            className="-ml-2 p-2 text-foreground/70 transition-colors hover:text-foreground lg:hidden"
+            aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
 
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <span className="font-display font-extrabold text-xl tracking-tight text-foreground">
-              LACED<span className="text-primary">UP</span>
+          <Link href="/" className="group flex shrink-0 items-center gap-2" aria-label="VibeFlex Sports home">
+            <span className="font-display text-xl font-black tracking-[-0.04em] text-foreground md:text-2xl">
+              VIBE<span className="text-primary">FLEX</span>
+            </span>
+            <span className="hidden border-l border-border pl-2 text-[9px] font-bold uppercase tracking-[0.22em] text-muted-foreground sm:block">
+              Sports
             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden flex-1 items-center justify-center gap-5 xl:flex" aria-label="Primary navigation">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  location.startsWith(link.href)
-                    ? "text-primary"
-                    : "text-foreground/70"
+                className={`whitespace-nowrap font-display text-xs font-semibold uppercase tracking-[0.12em] transition-colors hover:text-primary ${
+                  isActive(link.href) ? "text-primary" : "text-foreground/70"
                 }`}
               >
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/community"
+              className={`whitespace-nowrap font-display text-xs font-semibold uppercase tracking-[0.12em] transition-colors hover:text-primary ${
+                isActive("/community") || isActive("/ambassador") ? "text-primary" : "text-foreground/70"
+              }`}
+            >
+              Community
+            </Link>
           </nav>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 text-foreground/70 hover:text-foreground transition-colors"
-              aria-label="Search"
+              type="button"
+              onClick={() => setSearchOpen((open) => !open)}
+              className="rounded-full p-2.5 text-foreground/70 transition hover:bg-secondary hover:text-foreground"
+              aria-label="Search products"
+              aria-expanded={searchOpen}
             >
-              <Search size={20} />
+              <Search size={19} />
             </button>
             <Link
               href="/cart"
-              className="p-2 text-foreground/70 hover:text-foreground transition-colors relative"
+              className="relative rounded-full p-2.5 text-foreground/70 transition hover:bg-secondary hover:text-foreground"
+              aria-label="Open shopping bag"
             >
-              <ShoppingBag size={20} />
+              <ShoppingBag size={19} />
             </Link>
           </div>
         </div>
 
-        {/* Search Overlay */}
-        <AnimatePresence>
+        <AnimatePresence initial={false}>
           {searchOpen && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-              className="overflow-hidden border-t border-border"
+              transition={{ duration: 0.25 }}
+              className="overflow-hidden border-t border-border bg-background"
             >
-              <form onSubmit={handleSearch} className="container py-4">
-                <div className="relative max-w-2xl mx-auto">
+              <form onSubmit={handleSearch} className="container py-5" role="search">
+                <div className="relative mx-auto max-w-3xl">
                   <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
-                    type="text"
+                    type="search"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search training gear, activewear, footwear..."
-                    className="w-full bg-secondary text-foreground pl-12 pr-4 py-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body text-sm placeholder:text-muted-foreground"
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Search VibeFlex collections and products"
+                    className="w-full rounded-xl border border-border bg-secondary py-3.5 pl-12 pr-4 font-body text-sm text-foreground outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                     autoFocus
                   />
                 </div>
@@ -118,15 +133,16 @@ export default function Navbar() {
         </AnimatePresence>
       </header>
 
-      {/* Mobile Nav Drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <>
-            <motion.div
+            <motion.button
+              type="button"
+              aria-label="Close navigation overlay"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden"
               onClick={() => setMobileOpen(false)}
             />
             <motion.nav
@@ -134,34 +150,52 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed top-0 left-0 bottom-0 z-50 w-72 bg-background border-r border-border p-6 lg:hidden"
+              className="fixed inset-y-0 left-0 z-50 w-[86%] max-w-sm overflow-y-auto border-r border-border bg-background p-6 lg:hidden"
+              aria-label="Mobile navigation"
             >
-              <div className="flex items-center justify-between mb-8">
-                <span className="font-display font-extrabold text-xl tracking-tight">
-                  LACED<span className="text-primary">UP</span>
-                </span>
-                <button
-                  onClick={() => setMobileOpen(false)}
-                  className="p-2 text-foreground/70 hover:text-foreground"
-                >
+              <div className="mb-9 flex items-center justify-between">
+                <Link href="/" onClick={() => setMobileOpen(false)} className="font-display text-2xl font-black tracking-[-0.04em]">
+                  VIBE<span className="text-primary">FLEX</span>
+                </Link>
+                <button type="button" onClick={() => setMobileOpen(false)} className="rounded-full p-2 text-foreground/70 hover:bg-secondary hover:text-foreground" aria-label="Close navigation">
                   <X size={20} />
                 </button>
               </div>
+
+              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Collections</p>
               <div className="flex flex-col gap-1">
                 {NAV_LINKS.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
-                      location.startsWith(link.href)
-                        ? "bg-primary/10 text-primary"
-                        : "text-foreground/70 hover:bg-secondary hover:text-foreground"
+                    className={`rounded-lg px-4 py-3.5 font-display text-sm font-semibold transition-colors ${
+                      isActive(link.href) ? "bg-primary/10 text-primary" : "text-foreground/75 hover:bg-secondary hover:text-foreground"
                     }`}
                   >
                     {link.label}
                   </Link>
                 ))}
+              </div>
+
+              <div className="my-6 h-px bg-border" />
+              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">VibeFlex</p>
+              <div className="flex flex-col gap-1">
+                {COMMUNITY_LINKS.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`rounded-lg px-4 py-3.5 text-sm font-medium transition-colors ${
+                      isActive(link.href) ? "bg-primary/10 text-primary" : "text-foreground/75 hover:bg-secondary hover:text-foreground"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                <Link href="/contact" onClick={() => setMobileOpen(false)} className="rounded-lg px-4 py-3.5 text-sm font-medium text-foreground/75 transition hover:bg-secondary hover:text-foreground">
+                  Contact
+                </Link>
               </div>
             </motion.nav>
           </>
