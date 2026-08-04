@@ -1,4 +1,5 @@
 const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") ?? "https://daa25.github.io";
+const shopifyCanonicalDomain = "hbipmy-3g.myshopify.com";
 
 function corsHeaders(req: Request) {
   const origin = req.headers.get("origin");
@@ -28,13 +29,10 @@ let tokenExpiresAt = 0;
 
 async function shopifyToken() {
   if (cachedToken && Date.now() < tokenExpiresAt - 60_000) return cachedToken;
-
-  const shop = Deno.env.get("SHOPIFY_SHOP") ?? Deno.env.get("SHOPIFY_SHOP_DOMAIN");
   const clientId = required("SHOPIFY_CLIENT_ID");
   const clientSecret = required("SHOPIFY_CLIENT_SECRET");
-  if (!shop) throw new Error("SHOPIFY_SHOP is not configured.");
 
-  const response = await fetch(`https://${shop}/admin/oauth/access_token`, {
+  const response = await fetch(`https://${shopifyCanonicalDomain}/admin/oauth/access_token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -55,12 +53,10 @@ async function shopifyToken() {
 }
 
 async function shopify(query: string, variables: Record<string, unknown> = {}) {
-  const shop = Deno.env.get("SHOPIFY_SHOP") ?? Deno.env.get("SHOPIFY_SHOP_DOMAIN");
-  if (!shop) throw new Error("SHOPIFY_SHOP is not configured.");
   const apiVersion = Deno.env.get("SHOPIFY_API_VERSION") ?? "2026-07";
   const token = await shopifyToken();
 
-  const response = await fetch(`https://${shop}/admin/api/${apiVersion}/graphql.json`, {
+  const response = await fetch(`https://${shopifyCanonicalDomain}/admin/api/${apiVersion}/graphql.json`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -78,13 +74,19 @@ async function shopify(query: string, variables: Record<string, unknown> = {}) {
 
 async function testShopify() {
   const data = await shopify(`query {
-    shop { name }
+    shop {
+      name
+      myshopifyDomain
+      primaryDomain { host url }
+    }
     products(first: 3) { nodes { id title } }
     currentAppInstallation { accessScopes { handle } }
   }`);
   const scopes = data.currentAppInstallation?.accessScopes?.map((scope: { handle: string }) => scope.handle) ?? [];
   return {
     message: `Connected to ${data.shop.name}. Read ${data.products.nodes.length} products.`,
+    canonicalDomain: data.shop.myshopifyDomain,
+    primaryDomain: data.shop.primaryDomain?.host,
     scopes,
   };
 }
