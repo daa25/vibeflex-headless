@@ -1,4 +1,6 @@
 const config=window.VIBEFLEX_CONFIG||{};
+const shopifyApiDomain=config.shopifyApiDomain||config.shopifyDomain||'';
+const shopifyPublicDomain=config.shopifyPublicDomain||config.shopifyDomain||shopifyApiDomain;
 const colors=['Charcoal','Deep Teal','Navy','Forest Green'];
 const sizes=['S','M','L','XL','2XL','3XL'];
 const variants=colors.flatMap(color=>sizes.map(size=>({color,size,sku:`490-UCPH-${color.replace(/\s/g,'').slice(0,4).toUpperCase()}-${size}`})));
@@ -11,7 +13,7 @@ async function invoke(action,payload={}){
  const j=await r.json().catch(()=>({}));if(!r.ok||j.error)throw new Error(j.error||`Function failed (${r.status})`);return j;
 }
 const integrations=[
- {name:'Shopify',desc:'vibeflex-813.myshopify.com',action:'test-shopify',items:['Client ID + Secret exchanged server-side','Reads shop name and three products','Draft publishing stays owner-locked']},
+ {name:'Shopify',desc:`API: ${shopifyApiDomain} · Store: ${shopifyPublicDomain}`,action:'test-shopify',items:['Headless Client ID + Secret exchanged server-side','Reads shop name and three products','Draft publishing stays owner-locked']},
  {name:'Printful',desc:'Catalog, variants, and mockups',action:'test-printful',items:['Private token stays server-side','Read-only store test','No order or paid mockup during test']},
  {name:'Airtable',desc:'Shopify Product Catalog',action:'test-airtable',items:['Base appuaF1jfeBr2PPqn','Table tbl7t3sguT93pYwbV','Reads three records without changes']}
 ];
@@ -20,6 +22,19 @@ document.querySelectorAll('[data-test]').forEach(btn=>btn.addEventListener('clic
 document.querySelector('#run-demo').addEventListener('click',async()=>{const b=document.querySelector('#run-demo'),s=document.querySelector('#workflow-status');b.disabled=true;s.className='status';s.textContent='Checking owner access…';try{const d=await invoke('run-hoodie-demo',{product:{title:'490 Uncooked Premium Hoodie',colors,sizes,variants}});s.className='status ok';s.textContent=d.message;}catch(e){s.className='status error';s.textContent=e.message;}finally{b.disabled=false;}});
 let storeLoaded=false;
 let storeLoading=false;
-function storefrontConfigured(){return Boolean(config.shopifyDomain&&!String(config.shopifyDomain).includes('YOUR_')&&config.storefrontToken&&!String(config.storefrontToken).includes('YOUR_'));}
+function storefrontConfigured(){return Boolean(shopifyApiDomain&&!String(shopifyApiDomain).includes('YOUR_'));}
 function showStoreRetry(message){const status=document.querySelector('#store-status'),target=document.querySelector('#products');status.className='status error';status.textContent=message;target.innerHTML='<button id="retry-store">Try again</button>';document.querySelector('#retry-store')?.addEventListener('click',()=>loadStore(true));}
-async function loadStore(force=false){if(storeLoading||(!force&&storeLoaded))return;const status=document.querySelector('#store-status'),target=document.querySelector('#products');if(!storefrontConfigured()){storeLoaded=false;status.className='status';status.textContent='Store preview is not configured yet. Add the browser-safe Shopify Storefront token in config.js.';target.innerHTML='';return;}storeLoading=true;status.className='status';status.textContent='Loading products…';target.innerHTML='';try{const headers={'Content-Type':'application/json','X-Shopify-Storefront-Access-Token':config.storefrontToken};const r=await fetch(`https://${config.shopifyDomain}/api/2026-07/graphql.json`,{method:'POST',headers,body:JSON.stringify({query:`query { products(first:24, sortKey:CREATED_AT, reverse:true){nodes{id title handle featuredImage{url altText} priceRange{minVariantPrice{amount currencyCode}}}}}`})});const j=await r.json().catch(()=>({}));if(!r.ok||j.errors)throw new Error(j.errors?.[0]?.message||`Shopify failed (${r.status})`);const products=j.data?.products?.nodes||[];storeLoaded=true;status.className='status ok';status.textContent=`Loaded ${products.length} products.`;target.innerHTML=products.map(p=>`<article class="product">${p.featuredImage?`<img src="${p.featuredImage.url}" alt="${p.featuredImage.altText||p.title}">`:''}<h3>${p.title}</h3><p>$${p.priceRange.minVariantPrice.amount}</p><a href="https://${config.shopifyDomain}/products/${p.handle}" target="_blank" rel="noopener">View product</a></article>`).join('');}catch(e){storeLoaded=false;showStoreRetry(e instanceof Error?e.message:'Unable to load Shopify products.');}finally{storeLoading=false;}}
+async function loadStore(force=false){
+ if(storeLoading||(!force&&storeLoaded))return;
+ const status=document.querySelector('#store-status'),target=document.querySelector('#products');
+ if(!storefrontConfigured()){storeLoaded=false;status.className='status';status.textContent='Shopify API domain is not configured yet.';target.innerHTML='';return;}
+ storeLoading=true;status.className='status';status.textContent=config.storefrontToken?'Loading products securely…':'Loading products through Shopify tokenless Storefront access…';target.innerHTML='';
+ try{
+  const headers={'Content-Type':'application/json'};
+  if(config.storefrontToken)headers['X-Shopify-Storefront-Access-Token']=config.storefrontToken;
+  const r=await fetch(`https://${shopifyApiDomain}/api/2026-07/graphql.json`,{method:'POST',headers,body:JSON.stringify({query:`query { products(first:24, sortKey:CREATED_AT, reverse:true){nodes{id title handle featuredImage{url altText} priceRange{minVariantPrice{amount currencyCode}}}}}`})});
+  const j=await r.json().catch(()=>({}));if(!r.ok||j.errors)throw new Error(j.errors?.[0]?.message||`Shopify failed (${r.status})`);
+  const products=j.data?.products?.nodes||[];storeLoaded=true;status.className='status ok';status.textContent=`Loaded ${products.length} products${config.storefrontToken?' with the public Storefront token':' using tokenless access'}.`;
+  target.innerHTML=products.map(p=>`<article class="product">${p.featuredImage?`<img src="${p.featuredImage.url}" alt="${p.featuredImage.altText||p.title}">`:''}<h3>${p.title}</h3><p>$${p.priceRange.minVariantPrice.amount}</p><a href="https://${shopifyPublicDomain}/products/${p.handle}" target="_blank" rel="noopener">View product</a></article>`).join('');
+ }catch(e){storeLoaded=false;showStoreRetry(e instanceof Error?e.message:'Unable to load Shopify products.');}finally{storeLoading=false;}
+}
