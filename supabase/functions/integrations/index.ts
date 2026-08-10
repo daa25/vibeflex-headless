@@ -1,3 +1,5 @@
+import { resolvePrintfulToken } from "./printful-token.ts";
+
 const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") ?? "https://daa25.github.io";
 const shopifyCanonicalDomain = "hbipmy-3g.myshopify.com";
 
@@ -92,7 +94,8 @@ async function testShopify() {
 }
 
 async function testPrintful() {
-  const token = required("PRINTFUL_TOKEN");
+  // Explicit resolution. Never inferred from other secrets.
+  const token = resolvePrintfulToken(Deno.env);
   const response = await fetch("https://api.printful.com/stores", {
     headers: { Authorization: `Bearer ${token}` },
   });
