@@ -10,16 +10,30 @@ Do not create another backend, storefront, or duplicate Shopify product when the
 
 - **GitHub:** code source of truth
 - **Repository:** `daa25/vibeflex-headless`
-- **Branch:** `main`
+- **Default branch:** `main`
+- **Current Studio repair/integration branch:** `claude/vibeos-vibeflex-reconciliation-8jjjg7`
 - **Studio frontend:** `vibeflex-studio-pages/`
-- **Supabase runtime:** `whfbpjgqlsoshrvpsoua`
-- **Supabase public URL:** `https://whfbpjgqlsoshrvpsoua.supabase.co`
-- **Supabase Edge Function:** `integrations`
+- **Canonical POD runtime:** `uluyuqrikzicapnezmqd` (`vibeflex-printful-automation`)
+- **Canonical POD runtime URL:** `https://uluyuqrikzicapnezmqd.supabase.co`
 - **Shopify API/OAuth domain:** `hbipmy-3g.myshopify.com`
 - **Shopify public domain:** `vibeflex-813.myshopify.com`
 - **Airtable control plane base:** `appuaF1jfeBr2PPqn`
 - **Internal proof tenant:** `490-movement`
 - **First supplier to productionize:** Printful
+
+### Important branch/runtime reconciliation
+
+`main` still contains an older Studio browser config pointing at Supabase project `whfbpjgqlsoshrvpsoua`. Do **not** treat that older value as the canonical POD runtime. The newer repair branch `claude/vibeos-vibeflex-reconciliation-8jjjg7` points the Studio at `uluyuqrikzicapnezmqd`, the runtime used by the verified POD canary evidence recorded in Airtable.
+
+Before merging or deploying, inspect the repair branch and reconcile it into `main` intentionally; do not overwrite the newer runtime with the stale `whfb...` value.
+
+## Proven execution state
+
+The commerce pipeline itself has already been proven server-side for the Blood Hit The Stain Cross Tee: real Printful variants/costs, real mockup, Shopify Draft write-back, margin state, and `READY_FOR_APPROVAL` were verified against live Shopify.
+
+The remaining P0 gap is the defining one: the same workflow still needs to be driven end-to-end **through the actual Studio UI**, not only by direct Edge Function invocation.
+
+A second supplier-side format (Cuffed Beanie) has also passed artwork/catalog/mockup verification, which is useful P1 evidence but does not replace the Studio-UI acceptance requirement.
 
 ## Existing Studio capabilities
 
@@ -27,22 +41,22 @@ The Studio is a static/mobile-first GitHub Pages frontend backed by Supabase Edg
 
 Private credentials must stay server-side in Supabase secrets. Never place private values in GitHub Pages, browser config, Airtable, Drive, screenshots, chat, or committed `.env` files.
 
-## Backend environment names currently consumed by `integrations`
+## Backend secret/config names
 
-Do not print values. Treat these names only as configuration contracts:
+Do not print values. Treat names only as configuration contracts. Inspect the canonical `uluy...` functions before assuming the final list, but historically/currently relevant names include:
 
 - `SHOPIFY_CLIENT_ID`
 - `SHOPIFY_CLIENT_SECRET`
-- `SHOPIFY_API_VERSION` (optional, defaults to `2026-07`)
-- `PRINTFUL_TOKEN`
+- `SHOPIFY_API_VERSION`
+- `PRINTFUL_TOKEN` and/or the canonical Printful secret name used by the repaired runtime
 - `AIRTABLE_TOKEN`
-- `AIRTABLE_BASE_ID` (optional; canonical value above)
+- `AIRTABLE_BASE_ID`
 - `AIRTABLE_TABLE_ID`
 - `ALLOWED_ORIGIN`
 - `ALLOW_DRAFT_PRODUCT_CREATE`
 - `OWNER_USER_ID`
 
-Do not add `SHOPIFY_ADMIN_ACCESS_TOKEN` unless the current implementation is intentionally changed away from its client-credentials token exchange.
+Do not add `SHOPIFY_ADMIN_ACCESS_TOKEN` unless the current implementation intentionally requires it. Prefer the existing authenticated server-side model.
 
 ## Non-secret cloud configuration
 
@@ -55,8 +69,8 @@ VIBEFLEX_INTERNAL_TENANT=490-movement
 SHOPIFY_API_DOMAIN=hbipmy-3g.myshopify.com
 SHOPIFY_PUBLIC_DOMAIN=vibeflex-813.myshopify.com
 AIRTABLE_BASE_ID=appuaF1jfeBr2PPqn
-SUPABASE_PROJECT_REF=whfbpjgqlsoshrvpsoua
-SUPABASE_PUBLIC_URL=https://whfbpjgqlsoshrvpsoua.supabase.co
+SUPABASE_PROJECT_REF=uluyuqrikzicapnezmqd
+SUPABASE_PUBLIC_URL=https://uluyuqrikzicapnezmqd.supabase.co
 ```
 
 These are not credentials.
@@ -108,6 +122,7 @@ Never use leaked or historical credentials discovered in files, Drive, docs, cha
 6. In cold-start analytics, prioritize verified economics and instrumentation before predictive claims.
 7. Log material automation executions to Airtable `Agent Runs`.
 8. When blocked, return the smallest genuine owner-only action; continue all safe work that does not require it.
+9. Treat Airtable's newer verified execution evidence and the repair branch as fresher than the stale `main` Studio runtime config until reconciliation is merged.
 
 ## Validation commands
 
