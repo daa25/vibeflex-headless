@@ -16,6 +16,20 @@ if ! command -v pnpm >/dev/null 2>&1; then
   corepack enable
 fi
 
+# Load committed non-secret defaults. Values already exported win, so a cloud
+# environment or CI can override any of them. This file must never hold secrets.
+NONSECRET_ENV="$(dirname "$0")/../config/vibeflex-nonsecret.env"
+if [[ -f "$NONSECRET_ENV" ]]; then
+  echo "Loading non-secret defaults from config/vibeflex-nonsecret.env"
+  while IFS='=' read -r k v; do
+    [[ -z "$k" || "$k" == \#* ]] && continue
+    k="${k// /}"
+    [[ -z "${!k:-}" ]] && export "$k=$v"
+  done < "$NONSECRET_ENV"
+else
+  echo 'WARN: config/vibeflex-nonsecret.env not found; relying on the ambient environment.'
+fi
+
 required_nonsecret=(
   VIBEFLEX_ENV
   VIBEFLEX_INTERNAL_TENANT
