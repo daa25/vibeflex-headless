@@ -97,10 +97,11 @@ for (const { name, consumer } of BACKEND_SECRETS) {
 record(
   "warn",
   "secret",
-  "Known defect: the project's single custom secret is named " +
-    '"Shopify & VibeFlex Studio" but carries the Printful token. Functions fall ' +
-    "back to picking the only non-Shopify secret, which BREAKS as soon as a " +
-    "second custom secret is added. Re-add it as PRINTFUL_TOKEN first.",
+  'Legacy: the project\'s single custom secret is named "Shopify & VibeFlex Studio" ' +
+    "but carries the Printful token. The functions NO LONGER fall back to guessing it — " +
+    "resolution is explicit via PRINTFUL_TOKEN, so Printful returns MISSING_PRINTFUL_TOKEN " +
+    "until that secret exists. Run scripts/fix-supabase-secrets.sh to add it and remove " +
+    "the misnamed entry.",
 );
 
 // ---------- report ----------
