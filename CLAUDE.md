@@ -1,121 +1,238 @@
-# VibeFlex POD Studio — canonical configuration
+# VibeFlex POD Studio — Canonical Claude Project Context
 
-Everything below was confirmed against the live connected systems. Prefer these
-values over anything found in older repositories, historical `.env` files, or
-archived architecture docs — several of those are known to be wrong.
+## Mission
 
-## Canonical systems
+Ship one production-grade VibeFlex POD Studio workflow for 490 Movement, then prove repeatability with a second product, then evolve the same system into a multi-tenant Shopify SaaS.
 
-| Role | Canonical value |
-| --- | --- |
-| Commerce source of truth | Shopify `vibeflex-813.myshopify.com` |
-| Code source of truth | `daa25/vibeflex-headless` |
-| Server runtime + secrets | Supabase project `uluyuqrikzicapnezmqd` |
-| Operations control plane | Airtable base `appuaF1jfeBr2PPqn` |
-| Studio implementation | `vibeflex-studio-pages/` in this repo |
-| Internal tenant | 490 Movement (`490-movement`) |
-| First production supplier | Printful |
+Do not create another backend, storefront, or duplicate Shopify product when the existing canonical systems can be extended.
 
-`daa25/VibeFlex-Studio` is **not** the Studio implementation despite the name.
-The Studio lives here, in `vibeflex-studio-pages/`.
+## Canonical architecture
 
-## Non-secret configuration
+- **GitHub:** code source of truth
+- **Repository:** `daa25/vibeflex-headless`
+- **Default branch:** `main`
+- **Current Studio repair/integration branch:** `claude/vibeos-vibeflex-reconciliation-8jjjg7`
+- **Studio frontend:** `vibeflex-studio-pages/`
+- **Canonical POD runtime:** `uluyuqrikzicapnezmqd` (`vibeflex-printful-automation`)
+- **Canonical POD runtime URL:** `https://uluyuqrikzicapnezmqd.supabase.co`
+- **Shopify API/OAuth domain:** `hbipmy-3g.myshopify.com`
+- **Shopify public domain:** `vibeflex-813.myshopify.com`
+- **Airtable control plane base:** `appuaF1jfeBr2PPqn`
+- **Internal proof tenant:** `490-movement`
+- **First supplier to productionize:** Printful
 
-```
+### Runtime reconciliation — RESOLVED
+
+`main` previously carried a Studio browser config pointing at Supabase project
+`whfbpjgqlsoshrvpsoua`. That project does **not** exist in the only Supabase
+organization on this account ("Vibelink & VibeFlex HQ"), so every Studio action
+was a guaranteed failure — the requests went to a project nobody owns.
+
+`vibeflex-studio-pages/config.js` now points at `uluyuqrikzicapnezmqd`, the
+runtime holding the Printful credential and the verified POD functions. Never
+reintroduce the `whfb...` value; `scripts/vibeflex-doctor.mjs` fails the build
+if it reappears.
+
+## Proven execution state
+
+The commerce pipeline itself has already been proven server-side for the Blood Hit The Stain Cross Tee: real Printful variants/costs, real mockup, Shopify Draft write-back, margin state, and `READY_FOR_APPROVAL` were verified against live Shopify.
+
+The remaining P0 gap is the defining one: the same workflow still needs to be driven end-to-end **through the actual Studio UI**, not only by direct Edge Function invocation.
+
+A second supplier-side format (Cuffed Beanie) has also passed artwork/catalog/mockup verification, which is useful P1 evidence but does not replace the Studio-UI acceptance requirement.
+
+## Existing Studio capabilities
+
+The Studio is a static/mobile-first GitHub Pages frontend backed by Supabase Edge Functions. It already contains Shopify, Printful, and Airtable connection-test paths, a Shopify Draft product creation gate, Storefront preview, and 24-variant hoodie validation.
+
+Private credentials must stay server-side in Supabase secrets. Never place private values in GitHub Pages, browser config, Airtable, Drive, screenshots, chat, or committed `.env` files.
+
+## Backend secret/config names
+
+Do not print values. Treat names only as configuration contracts. Inspect the canonical `uluy...` functions before assuming the final list, but historically/currently relevant names include:
+
+- `SHOPIFY_CLIENT_ID`
+- `SHOPIFY_CLIENT_SECRET`
+- `SHOPIFY_API_VERSION`
+- `PRINTFUL_TOKEN` and/or the canonical Printful secret name used by the repaired runtime
+- `AIRTABLE_TOKEN`
+- `AIRTABLE_BASE_ID`
+- `AIRTABLE_TABLE_ID`
+- `ALLOWED_ORIGIN`
+- `ALLOW_DRAFT_PRODUCT_CREATE`
+- `OWNER_USER_ID`
+
+Do not add `SHOPIFY_ADMIN_ACCESS_TOKEN` unless the current implementation intentionally requires it. Prefer the existing authenticated server-side model.
+
+## Non-secret cloud configuration
+
+Safe values for a Claude/cloud development environment:
+
+```env
+NODE_ENV=production
 VIBEFLEX_ENV=production
 VIBEFLEX_INTERNAL_TENANT=490-movement
 SHOPIFY_API_DOMAIN=hbipmy-3g.myshopify.com
 SHOPIFY_PUBLIC_DOMAIN=vibeflex-813.myshopify.com
 AIRTABLE_BASE_ID=appuaF1jfeBr2PPqn
-AIRTABLE_TABLE_ID=tbl7t3sguT93pYwbV
 SUPABASE_PROJECT_REF=uluyuqrikzicapnezmqd
 SUPABASE_PUBLIC_URL=https://uluyuqrikzicapnezmqd.supabase.co
 ```
 
-None of these are secrets. The Supabase anon key is likewise publishable and
-belongs in `vibeflex-studio-pages/config.js`.
+These are not credentials.
 
-### The two Shopify domains are not interchangeable
+## P0 definition of done
 
-- `hbipmy-3g.myshopify.com` — Admin API and OAuth. Server-side only.
-- `vibeflex-813.myshopify.com` — customer-facing storefront links.
+One real operator workflow must run through the actual Studio and produce:
 
-Collapsing them into one value breaks either checkout links or Admin auth.
-This has already been fixed once; do not undo it.
+1. real artwork
+2. real Printful blank
+3. real Printful variants
+4. verified supplier cost
+5. margin calculation
+6. real mockup
+7. generated product content/SEO
+8. Shopify **DRAFT** product or safe update of the designated existing draft
+9. correct variants and media
+10. Airtable operational record
+11. Airtable Agent Run
+12. final `READY_FOR_APPROVAL` state
 
-## Secrets
+No product activation, live-theme publication, or paid supplier order is allowed during P0.
 
-Secrets live **only** in Supabase Edge Function secrets on project
-`uluyuqrikzicapnezmqd`. Never in this repo, the browser, Airtable, Drive,
-commits, or a chat transcript.
+## P1
 
-Refer to secrets by name. Never read or print a value.
+Immediately after P0, send a second product format through the same Studio UI and backend without one-off engineering. P1 proves repeatability.
 
-| Secret | Consumer | State |
-| --- | --- | --- |
-| Printful token | `printful-*`, `pod-studio-verify-product`, `integrations` | present, but see below |
-| `SHOPIFY_CLIENT_ID` | `integrations` (Admin OAuth) | missing |
-| `SHOPIFY_CLIENT_SECRET` | `integrations` (Admin OAuth) | missing |
-| `AIRTABLE_TOKEN` | `integrations` | missing |
-| `OWNER_USER_ID` | owner gate on Shopify writes | missing |
-| `ALLOW_DRAFT_PRODUCT_CREATE` | owner gate on Shopify writes | not enabled |
+## Safety gates
 
-### Known defect: the Printful secret is misnamed
+Require owner approval before:
 
-The project holds exactly one custom secret and it is named
-`Shopify & VibeFlex Studio` — a label pasted into the name field. It actually
-carries the Printful token, which is why `PRINTFUL_API_KEY is not set` appears
-in the logs while Printful calls still succeed.
+- activating/publishing Shopify products
+- publishing Shopify themes
+- paid supplier orders
+- live price changes above the approved threshold
+- credential rotation
+- deleting production data
+- sending customer outreach
 
-The working functions cope via a fallback that picks the single non-Shopify
-secret. **That fallback breaks the moment a second custom secret is added**,
-because it requires exactly one candidate. Adding `SHOPIFY_CLIENT_ID` or
-`AIRTABLE_TOKEN` will therefore silently break Printful unless the token is
-first re-added under the name `PRINTFUL_TOKEN`.
+Never use leaked or historical credentials discovered in files, Drive, docs, chat, git history, or screenshots.
 
-Do that rename **before** adding any other secret.
+## Operating rules
 
-## Deployed Edge Functions (project `uluyuqrikzicapnezmqd`)
+1. Inspect current code/live integrations before assuming.
+2. Prefer extending existing code over creating parallel implementations.
+3. Use Shopify as commerce truth, Supabase as secure runtime, Airtable as operations/audit, GitHub as code truth.
+4. Keep drafts non-purchasable unless the owner explicitly approves activation.
+5. Never fabricate supplier cost, mockup readiness, demand, revenue, or ML confidence.
+6. In cold-start analytics, prioritize verified economics and instrumentation before predictive claims.
+7. Log material automation executions to Airtable `Agent Runs`.
+8. When blocked, return the smallest genuine owner-only action; continue all safe work that does not require it.
+9. Treat Airtable's newer verified execution evidence and the repair branch as fresher than the stale `main` Studio runtime config until reconciliation is merged.
+
+## Validation commands
+
+Run before committing implementation changes:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm check
+pnpm test
+pnpm build
+```
+
+Run lint when the repository exposes a lint script.
+
+## Deployed Edge Functions — project `uluyuqrikzicapnezmqd`
 
 | Function | Purpose |
 | --- | --- |
-| `integrations` | action router the Studio UI calls |
-| `pod-studio-verify-product` | artwork → storage → variants → real cost → margin → mockup |
-| `printful-catalog-lookup` | read-only catalog and variant lookup |
+| `integrations` | action router the Studio UI calls (`test-shopify`, `test-printful`, `test-airtable`, `secret-status`, `run-hoodie-demo`) |
+| `pod-studio-verify-product` | artwork -> storage -> variants -> real cost -> margin -> real mockup |
+| `printful-catalog-lookup` | read-only catalog/variant lookup |
 | `printful-create-product` | supplier sync product (owner-gated) |
 | `printful-canary` | end-to-end supplier check |
 | `env-probe` | reports secret names only, never values |
 
-Deployed function source can drift from `supabase/functions/` in this repo.
-Treat the deployed version as the running truth and reconcile deliberately.
+Deployed source can drift from `supabase/functions/` in this repo. The deployed
+version is the running truth; reconcile deliberately rather than assuming the
+repo matches.
 
-## Guardrails
+## Known defect: the Printful secret is misnamed
 
-Never, without explicit owner authorization:
+This resolves the ambiguity in "Backend secret/config names" above.
 
-- publish or replace the live Shopify theme (draft `161962623213` stays draft)
-- activate a product, or change a live price
-- place a paid supplier order, or auto-confirm pending Printful orders
-- message customers
-- rotate, print, or relocate a credential
-- create a second backend, a duplicate Shopify product, or another Airtable base
+The project holds exactly **one** custom secret, and it is named
+`Shopify & VibeFlex Studio` — a label pasted into the name field. It actually
+carries the **Printful** token. That is why the logs read
+`PRINTFUL_API_KEY is not set` while Printful calls still succeed: the functions
+fall back to "use the only non-Shopify secret present".
 
-Studio validation uses Shopify **DRAFT** products. Terminal state is
-`READY_FOR_APPROVAL`, never `ACTIVE`.
+**That fallback requires exactly one candidate.** Adding `SHOPIFY_CLIENT_ID` or
+`AIRTABLE_TOKEN` makes two, the fallback gives up, and Printful breaks — with no
+change to anything Printful-related.
 
-## Current state
+So the token must be re-added under the name `PRINTFUL_TOKEN` **before** any
+other secret is added. `scripts/fix-supabase-secrets.sh` enforces that ordering
+and refuses to continue if the first step fails.
 
-- Shopify: 18 active / 21 draft / 39 total. **0 orders, 0 customers.**
-- Supplier cost exists for only 5 of 39 products, so margin is uncomputable
-  for the rest. This blocks revenue intelligence more than the missing orders
-  do, and unlike orders it is fixable now.
-- Demand and revenue forecasting are not buildable until real orders exist.
-  Do not ship forecasts built on zero observations.
+Current secret state (names only):
 
-## Commands
+| Secret | Present | Consumer |
+| --- | --- | --- |
+| `Shopify & VibeFlex Studio` (misnamed) | yes | Printful, via fallback |
+| `PRINTFUL_TOKEN` | no | `integrations`, `pod-studio-verify-product`, `printful-*` |
+| `SHOPIFY_CLIENT_ID` | no | `integrations` (Admin OAuth) |
+| `SHOPIFY_CLIENT_SECRET` | no | `integrations` (Admin OAuth) |
+| `AIRTABLE_TOKEN` | no | `integrations` |
+| `OWNER_USER_ID` | no | owner gate on Shopify writes |
+| `ALLOW_DRAFT_PRODUCT_CREATE` | not enabled | owner gate on Shopify writes |
+
+Consequence: of the Studio's three connection cards, only **Printful** can pass
+today. Shopify and Airtable fail on missing secrets, not on bad code.
+
+## Network allowlist
+
+A cloud session on "trusted" networking reaches only `api.github.com`. These
+must be allowlisted before any direct runtime call — including driving the
+Studio's own path — can be exercised:
+
+```
+api.printful.com
+hbipmy-3g.myshopify.com
+vibeflex-813.myshopify.com
+api.airtable.com
+uluyuqrikzicapnezmqd.supabase.co
+daa25.github.io
+```
+
+Shopify/Airtable/Supabase work in-session only because those MCP servers run
+outside the container.
+
+## Verified live state
+
+- Shopify: 18 active / 21 draft / 0 archived / 39 total. **0 orders, 0 customers.**
+- Supplier cost exists for only **5 of 39** products, so margin, pricing and
+  bundle economics are uncomputable for the rest. This blocks revenue
+  intelligence harder than the missing orders do, and unlike orders it is
+  fixable now.
+- Demand and revenue forecasting are not buildable until real orders exist. Do
+  not ship forecasts, audience segments, or model-accuracy claims built on zero
+  observations — see operating rule 5.
+- Lowest verified margin: `#UNCOOKED 70x7 Stainless Water Bottle` at 14.6%
+  ($28.00 retail / $23.91 cost), likely loss-making after fees and shipping.
+  Still DRAFT, so resolve before activation.
+
+## Configuration check
+
+`scripts/bootstrap-claude.sh` validates the **environment**.
+`scripts/vibeflex-doctor.mjs` validates the **committed Studio config file** —
+the phantom-project bug lived there, and the env-var checks would not have
+caught it.
 
 ```bash
-pnpm install
-node scripts/vibeflex-doctor.mjs   # non-secret config + integration health
-pnpm vitest run                    # tests
+node scripts/vibeflex-doctor.mjs          # config + integration health
+node scripts/vibeflex-doctor.mjs --json   # machine-readable
 ```
+
+Both report secret **names** only and never read or print a value.
