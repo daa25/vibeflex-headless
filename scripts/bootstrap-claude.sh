@@ -3,7 +3,8 @@ set -euo pipefail
 
 printf '\nVibeFlex POD Studio — Claude bootstrap\n'
 printf 'Repository: daa25/vibeflex-headless\n'
-printf 'Expected branch: main\n\n'
+printf 'Default branch: main\n'
+printf 'Current Studio repair branch: claude/vibeos-vibeflex-reconciliation-8jjjg7\n\n'
 
 if ! command -v node >/dev/null 2>&1; then
   echo 'ERROR: Node.js is required.' >&2
@@ -38,9 +39,18 @@ printf '\nCanonical expected values (non-secret):\n'
 printf '  SHOPIFY_API_DOMAIN=hbipmy-3g.myshopify.com\n'
 printf '  SHOPIFY_PUBLIC_DOMAIN=vibeflex-813.myshopify.com\n'
 printf '  AIRTABLE_BASE_ID=appuaF1jfeBr2PPqn\n'
-printf '  SUPABASE_PROJECT_REF=whfbpjgqlsoshrvpsoua\n'
-printf '  SUPABASE_PUBLIC_URL=https://whfbpjgqlsoshrvpsoua.supabase.co\n'
+printf '  SUPABASE_PROJECT_REF=uluyuqrikzicapnezmqd\n'
+printf '  SUPABASE_PUBLIC_URL=https://uluyuqrikzicapnezmqd.supabase.co\n'
 printf '  VIBEFLEX_INTERNAL_TENANT=490-movement\n\n'
+
+if [[ "${SUPABASE_PROJECT_REF:-}" == "whfbpjgqlsoshrvpsoua" ]]; then
+  echo 'ERROR: stale Studio Supabase project detected (whfb...). Use canonical uluyuqrikzicapnezmqd.' >&2
+  exit 2
+fi
+
+if [[ -n "${SUPABASE_PROJECT_REF:-}" && "${SUPABASE_PROJECT_REF}" != "uluyuqrikzicapnezmqd" ]]; then
+  echo "WARN: SUPABASE_PROJECT_REF differs from the current canonical POD runtime. Reconcile before deploying."
+fi
 
 echo 'Installing dependencies...'
 pnpm install --frozen-lockfile
