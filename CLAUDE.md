@@ -158,38 +158,48 @@ Deployed source can drift from `supabase/functions/` in this repo. The deployed
 version is the running truth; reconcile deliberately rather than assuming the
 repo matches.
 
-## Known defect: the Printful secret is misnamed
+## Printful secret resolution — hardened
 
 This resolves the ambiguity in "Backend secret/config names" above.
 
 The project holds exactly **one** custom secret, and it is named
 `Shopify & VibeFlex Studio` — a label pasted into the name field. It actually
-carries the **Printful** token. That is why the logs read
-`PRINTFUL_API_KEY is not set` while Printful calls still succeed: the functions
-fall back to "use the only non-Shopify secret present".
+carries the **Printful** token.
 
-**That fallback requires exactly one candidate.** Adding `SHOPIFY_CLIENT_ID` or
-`AIRTABLE_TOKEN` makes two, the fallback gives up, and Printful breaks — with no
-change to anything Printful-related.
+The functions used to cope by scanning for "the only non-Shopify secret
+present". That heuristic required exactly one candidate, so adding any
+unrelated secret produced two, the scan gave up, and Printful broke — pointing
+the blame at the wrong system entirely.
 
-So the token must be re-added under the name `PRINTFUL_TOKEN` **before** any
-other secret is added. `scripts/fix-supabase-secrets.sh` enforces that ordering
-and refuses to continue if the first step fails.
+**That fallback is now removed.** `supabase/functions/_shared/printful-token.ts`
+resolves the credential explicitly: `PRINTFUL_TOKEN`, or a `PrintfulTokenError`
+carrying code `MISSING_PRINTFUL_TOKEN`. It reads one variable, never infers
+Printful from another secret, and does not depend on how many secrets exist —
+so adding `AIRTABLE_TOKEN` or `SHOPIFY_CLIENT_ID` can no longer break it. Eight
+vitest cases pin that invariant, including the 25-added-secrets case and a case
+asserting the misnamed secret's value is never returned.
+
+Consequence of the hardening: Printful returns `MISSING_PRINTFUL_TOKEN` until
+`PRINTFUL_TOKEN` exists. That is intended — a named, greppable failure beats a
+heuristic that works until it silently doesn't. Run
+`scripts/fix-supabase-secrets.sh` to add the token under its canonical name and
+remove the misnamed entry.
 
 Current secret state (names only):
 
 | Secret | Present | Consumer |
 | --- | --- | --- |
-| `Shopify & VibeFlex Studio` (misnamed) | yes | Printful, via fallback |
-| `PRINTFUL_TOKEN` | no | `integrations`, `pod-studio-verify-product`, `printful-*` |
+| `Shopify & VibeFlex Studio` (misnamed) | yes | nothing — no longer read; delete it |
+| `PRINTFUL_TOKEN` | **no — Printful is down until added** | `integrations`, `pod-studio-verify-product`, `printful-*` |
 | `SHOPIFY_CLIENT_ID` | no | `integrations` (Admin OAuth) |
 | `SHOPIFY_CLIENT_SECRET` | no | `integrations` (Admin OAuth) |
 | `AIRTABLE_TOKEN` | no | `integrations` |
 | `OWNER_USER_ID` | no | owner gate on Shopify writes |
 | `ALLOW_DRAFT_PRODUCT_CREATE` | not enabled | owner gate on Shopify writes |
 
-Consequence: of the Studio's three connection cards, only **Printful** can pass
-today. Shopify and Airtable fail on missing secrets, not on bad code.
+Consequence: all three Studio connection cards fail until their secrets exist —
+Printful with `MISSING_PRINTFUL_TOKEN`, Shopify and Airtable on missing secrets.
+These are configuration gaps, not code defects.
 
 ## Network allowlist
 
