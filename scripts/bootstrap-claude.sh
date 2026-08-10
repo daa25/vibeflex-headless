@@ -71,6 +71,12 @@ pnpm test
 echo 'Running production build...'
 pnpm build
 
+echo 'Validating committed Studio config...'
+# bootstrap-claude.sh checks the ENVIRONMENT; the doctor checks the committed
+# vibeflex-studio-pages/config.js. The phantom-Supabase-project bug lived in
+# that file, where the env-var checks above could not see it.
+node scripts/vibeflex-doctor.mjs
+
 printf '\nBootstrap complete.\n'
 printf 'Private integration secrets must remain in Supabase/runtime secret storage.\n'
 printf 'This script intentionally never reads or prints secret values.\n'

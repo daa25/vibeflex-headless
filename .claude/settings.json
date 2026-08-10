@@ -9,7 +9,9 @@
       "Bash(pnpm lint:*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(node scripts/vibeflex-doctor.mjs:*)",
+      "Bash(bash scripts/bootstrap-claude.sh:*)"
     ],
     "deny": [
       "Read(.env)",
@@ -19,7 +21,20 @@
       "Edit(.env)",
       "Edit(.env.*)",
       "Edit(**/.env)",
-      "Edit(**/.env.*)"
+      "Edit(**/.env.*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*.p12)",
+      "Read(**/*.pfx)",
+      "Read(**/id_rsa*)",
+      "Read(**/credentials)",
+      "Read(**/credentials.json)",
+      "Read(**/service-account*.json)",
+      "Read(**/secrets.json)",
+      "Read(**/*secret*.json)",
+      "Read(**/.npmrc)",
+      "Read(**/.netrc)",
+      "Read(.supabase/**)"
     ]
   }
 }

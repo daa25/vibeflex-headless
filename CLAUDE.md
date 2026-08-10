@@ -21,11 +21,17 @@ Do not create another backend, storefront, or duplicate Shopify product when the
 - **Internal proof tenant:** `490-movement`
 - **First supplier to productionize:** Printful
 
-### Important branch/runtime reconciliation
+### Runtime reconciliation — RESOLVED
 
-`main` still contains an older Studio browser config pointing at Supabase project `whfbpjgqlsoshrvpsoua`. Do **not** treat that older value as the canonical POD runtime. The newer repair branch `claude/vibeos-vibeflex-reconciliation-8jjjg7` points the Studio at `uluyuqrikzicapnezmqd`, the runtime used by the verified POD canary evidence recorded in Airtable.
+`main` previously carried a Studio browser config pointing at Supabase project
+`whfbpjgqlsoshrvpsoua`. That project does **not** exist in the only Supabase
+organization on this account ("Vibelink & VibeFlex HQ"), so every Studio action
+was a guaranteed failure — the requests went to a project nobody owns.
 
-Before merging or deploying, inspect the repair branch and reconcile it into `main` intentionally; do not overwrite the newer runtime with the stale `whfb...` value.
+`vibeflex-studio-pages/config.js` now points at `uluyuqrikzicapnezmqd`, the
+runtime holding the Printful credential and the verified POD functions. Never
+reintroduce the `whfb...` value; `scripts/vibeflex-doctor.mjs` fails the build
+if it reappears.
 
 ## Proven execution state
 
@@ -136,3 +142,107 @@ pnpm build
 ```
 
 Run lint when the repository exposes a lint script.
+
+## Deployed Edge Functions — project `uluyuqrikzicapnezmqd`
+
+| Function | Purpose |
+| --- | --- |
+| `integrations` | action router the Studio UI calls (`test-shopify`, `test-printful`, `test-airtable`, `secret-status`, `run-hoodie-demo`) |
+| `pod-studio-verify-product` | artwork -> storage -> variants -> real cost -> margin -> real mockup |
+| `printful-catalog-lookup` | read-only catalog/variant lookup |
+| `printful-create-product` | supplier sync product (owner-gated) |
+| `printful-canary` | end-to-end supplier check |
+| `env-probe` | reports secret names only, never values |
+
+Deployed source can drift from `supabase/functions/` in this repo. The deployed
+version is the running truth; reconcile deliberately rather than assuming the
+repo matches.
+
+## Printful secret resolution — hardened
+
+This resolves the ambiguity in "Backend secret/config names" above.
+
+The project holds exactly **one** custom secret, and it is named
+`Shopify & VibeFlex Studio` — a label pasted into the name field. It actually
+carries the **Printful** token.
+
+The functions used to cope by scanning for "the only non-Shopify secret
+present". That heuristic required exactly one candidate, so adding any
+unrelated secret produced two, the scan gave up, and Printful broke — pointing
+the blame at the wrong system entirely.
+
+**That fallback is now removed.** `supabase/functions/_shared/printful-token.ts`
+resolves the credential explicitly: `PRINTFUL_TOKEN`, or a `PrintfulTokenError`
+carrying code `MISSING_PRINTFUL_TOKEN`. It reads one variable, never infers
+Printful from another secret, and does not depend on how many secrets exist —
+so adding `AIRTABLE_TOKEN` or `SHOPIFY_CLIENT_ID` can no longer break it. Eight
+vitest cases pin that invariant, including the 25-added-secrets case and a case
+asserting the misnamed secret's value is never returned.
+
+Consequence of the hardening: Printful returns `MISSING_PRINTFUL_TOKEN` until
+`PRINTFUL_TOKEN` exists. That is intended — a named, greppable failure beats a
+heuristic that works until it silently doesn't. Run
+`scripts/fix-supabase-secrets.sh` to add the token under its canonical name and
+remove the misnamed entry.
+
+Current secret state (names only):
+
+| Secret | Present | Consumer |
+| --- | --- | --- |
+| `Shopify & VibeFlex Studio` (misnamed) | yes | nothing — no longer read; delete it |
+| `PRINTFUL_TOKEN` | **no — Printful is down until added** | `integrations`, `pod-studio-verify-product`, `printful-*` |
+| `SHOPIFY_CLIENT_ID` | no | `integrations` (Admin OAuth) |
+| `SHOPIFY_CLIENT_SECRET` | no | `integrations` (Admin OAuth) |
+| `AIRTABLE_TOKEN` | no | `integrations` |
+| `OWNER_USER_ID` | no | owner gate on Shopify writes |
+| `ALLOW_DRAFT_PRODUCT_CREATE` | not enabled | owner gate on Shopify writes |
+
+Consequence: all three Studio connection cards fail until their secrets exist —
+Printful with `MISSING_PRINTFUL_TOKEN`, Shopify and Airtable on missing secrets.
+These are configuration gaps, not code defects.
+
+## Network allowlist
+
+A cloud session on "trusted" networking reaches only `api.github.com`. These
+must be allowlisted before any direct runtime call — including driving the
+Studio's own path — can be exercised:
+
+```
+api.printful.com
+hbipmy-3g.myshopify.com
+vibeflex-813.myshopify.com
+api.airtable.com
+uluyuqrikzicapnezmqd.supabase.co
+daa25.github.io
+```
+
+Shopify/Airtable/Supabase work in-session only because those MCP servers run
+outside the container.
+
+## Verified live state
+
+- Shopify: 18 active / 21 draft / 0 archived / 39 total. **0 orders, 0 customers.**
+- Supplier cost exists for only **5 of 39** products, so margin, pricing and
+  bundle economics are uncomputable for the rest. This blocks revenue
+  intelligence harder than the missing orders do, and unlike orders it is
+  fixable now.
+- Demand and revenue forecasting are not buildable until real orders exist. Do
+  not ship forecasts, audience segments, or model-accuracy claims built on zero
+  observations — see operating rule 5.
+- Lowest verified margin: `#UNCOOKED 70x7 Stainless Water Bottle` at 14.6%
+  ($28.00 retail / $23.91 cost), likely loss-making after fees and shipping.
+  Still DRAFT, so resolve before activation.
+
+## Configuration check
+
+`scripts/bootstrap-claude.sh` validates the **environment**.
+`scripts/vibeflex-doctor.mjs` validates the **committed Studio config file** —
+the phantom-project bug lived there, and the env-var checks would not have
+caught it.
+
+```bash
+node scripts/vibeflex-doctor.mjs          # config + integration health
+node scripts/vibeflex-doctor.mjs --json   # machine-readable
+```
+
+Both report secret **names** only and never read or print a value.
