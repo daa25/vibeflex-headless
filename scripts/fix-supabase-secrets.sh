@@ -176,11 +176,13 @@ ENTRIES="$(jq -n \
   --arg ssec "${SHOPIFY_CLIENT_SECRET:-}" \
   --arg at "${AIRTABLE_TOKEN:-}" \
   --arg owner "${OWNER_USER_ID:-}" \
+  --arg oemail "${OWNER_EMAIL}" \
   '[ {name:"SHOPIFY_CLIENT_ID",     value:$sid},
      {name:"SHOPIFY_CLIENT_SECRET", value:$ssec},
      {name:"AIRTABLE_TOKEN",        value:$at},
      {name:"OWNER_USER_ID",             value:$owner},
-     {name:"ALLOW_DRAFT_PRODUCT_CREATE", value:"true"} ]
+     {name:"ALLOW_DRAFT_PRODUCT_CREATE", value:"true"},
+     {name:"OWNER_EMAIL",               value:$oemail} ]
    | map(select(.value != ""))')"
 
 if [[ "$(jq 'length' <<<"$ENTRIES")" -gt 0 ]]; then
@@ -213,7 +215,7 @@ printf '%s\n' "$AFTER" | sed 's/^/  - /'
 echo
 MISSING=0
 for required in PRINTFUL_TOKEN SHOPIFY_CLIENT_ID SHOPIFY_CLIENT_SECRET \
-                AIRTABLE_TOKEN OWNER_USER_ID ALLOW_DRAFT_PRODUCT_CREATE; do
+                AIRTABLE_TOKEN ALLOW_DRAFT_PRODUCT_CREATE OWNER_EMAIL; do
   if printf '%s\n' "$AFTER" | grep -qx "$required"; then
     printf '  PASS  %s\n' "$required"
   else

@@ -1,3 +1,6 @@
+import { getAccessToken, onAuthState, restoreSession, signInWithEmail, signOut }
+  from "./auth.js";
+
 const config=window.VIBEFLEX_CONFIG||{};
 const shopifyApiDomain=config.shopifyApiDomain||config.shopifyDomain||'';
 const shopifyPublicDomain=config.shopifyPublicDomain||config.shopifyDomain||shopifyApiDomain;
@@ -7,11 +10,35 @@ const variants=colors.flatMap(color=>sizes.map(size=>({color,size,sku:`490-UCPH-
 function route(){const id=(location.hash||'#home').slice(1);document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('[data-route]').forEach(a=>a.classList.toggle('active',a.dataset.route===id));if(id==='store')loadStore();}
 addEventListener('hashchange',route);route();
 document.querySelector('#variant-grid').innerHTML=variants.map(v=>`<div><b>${v.color}</b><span>${v.size}</span><code>${v.sku}</code></div>`).join('');
-async function invoke(action,payload={}){
- if(!config.supabaseUrl||config.supabaseUrl.includes('YOUR_PROJECT'))throw new Error('Supabase URL is not configured in config.js.');
- const r=await fetch(`${config.supabaseUrl}/functions/v1/integrations`,{method:'POST',headers:{'Content-Type':'application/json','apikey':config.supabaseAnonKey,'Authorization':`Bearer ${config.supabaseAnonKey}`},body:JSON.stringify({action,...payload})});
- const j=await r.json().catch(()=>({}));if(!r.ok||j.error)throw new Error(j.error||`Function failed (${r.status})`);return j;
+// Protected operations travel on the SESSION token, never the anon key. The
+// anon JWT has role "anon", which the server-side operator gate cannot accept,
+// so sending it for a write produces a confusing 403 rather than a clear
+// "sign in" — hence the explicit check here.
+async function invoke(action, payload = {}, { requireAuth = false } = {}) {
+  if (!config.supabaseUrl || config.supabaseUrl.includes('YOUR_PROJECT')) {
+    throw new Error('Supabase URL is not configured in config.js.');
+  }
+
+  const sessionToken = await getAccessToken();
+  if (requireAuth && !sessionToken) {
+    throw new Error('Sign in on the Account tab before running a protected action.');
+  }
+
+  const bearer = sessionToken || config.supabaseAnonKey;
+  const r = await fetch(`${config.supabaseUrl}/functions/v1/integrations`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: config.supabaseAnonKey,
+      Authorization: `Bearer ${bearer}`,
+    },
+    body: JSON.stringify({ action, ...payload }),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || j.error) throw new Error(j.error || `Function failed (${r.status})`);
+  return j;
 }
+
 const integrations=[
  {name:'Shopify',desc:`API: ${shopifyApiDomain} · Store: ${shopifyPublicDomain}`,action:'test-shopify',items:['Headless Client ID + Secret exchanged server-side','Reads shop name and three products','Draft publishing stays owner-locked']},
  {name:'Printful',desc:'Catalog, variants, and mockups',action:'test-printful',items:['Private token stays server-side','Read-only store test','No order or paid mockup during test']},
@@ -19,7 +46,7 @@ const integrations=[
 ];
 document.querySelector('#connection-cards').innerHTML=integrations.map((x,i)=>`<section class="card connection"><div class="card-head"><div><span class="eyebrow">INTEGRATION</span><h2>${x.name}</h2><p>${x.desc}</p></div><span class="icon">⚡</span></div><ul>${x.items.map(v=>`<li>${v}</li>`).join('')}</ul><div id="connection-${i}" class="status">Not tested</div><button data-test="${i}">Test connection</button></section>`).join('');
 document.querySelectorAll('[data-test]').forEach(btn=>btn.addEventListener('click',async()=>{const i=Number(btn.dataset.test),x=integrations[i],s=document.querySelector(`#connection-${i}`);btn.disabled=true;s.className='status';s.textContent='Testing securely…';try{const d=await invoke(x.action);s.className='status ok';s.textContent=d.message||'Connected';}catch(e){s.className='status error';s.textContent=e.message;}finally{btn.disabled=false;}}));
-document.querySelector('#run-demo').addEventListener('click',async()=>{const b=document.querySelector('#run-demo'),s=document.querySelector('#workflow-status');b.disabled=true;s.className='status';s.textContent='Checking owner access…';try{const d=await invoke('run-hoodie-demo',{product:{title:'490 Uncooked Premium Hoodie',colors,sizes,variants}});s.className='status ok';s.textContent=d.message;}catch(e){s.className='status error';s.textContent=e.message;}finally{b.disabled=false;}});
+document.querySelector('#run-demo').addEventListener('click',async()=>{const b=document.querySelector('#run-demo'),s=document.querySelector('#workflow-status');b.disabled=true;s.className='status';s.textContent='Checking owner access…';try{const d=await invoke('run-hoodie-demo',{product:{title:'490 Uncooked Premium Hoodie',colors,sizes,variants}},{requireAuth:true});s.className='status ok';s.textContent=d.message;}catch(e){s.className='status error';s.textContent=e.message;}finally{b.disabled=false;}});
 let storeLoaded=false;
 let storeLoading=false;
 function storefrontConfigured(){return Boolean(shopifyApiDomain&&!String(shopifyApiDomain).includes('YOUR_'));}
@@ -38,3 +65,66 @@ async function loadStore(force=false){
   target.innerHTML=products.map(p=>`<article class="product">${p.featuredImage?`<img src="${p.featuredImage.url}" alt="${p.featuredImage.altText||p.title}">`:''}<h3>${p.title}</h3><p>$${p.priceRange.minVariantPrice.amount}</p><a href="https://${shopifyPublicDomain}/products/${p.handle}" target="_blank" rel="noopener">View product</a></article>`).join('');
  }catch(e){storeLoaded=false;showStoreRetry(e instanceof Error?e.message:'Unable to load Shopify products.');}finally{storeLoading=false;}
 }
+
+
+// ---------------------------------------------------------------- auth wiring
+const chip = document.querySelector('#session-chip');
+const chipLabel = document.querySelector('#session-label');
+const signOutBtn = document.querySelector('#sign-out');
+const signInForm = document.querySelector('#signin-form');
+const signInEmail = document.querySelector('#signin-email');
+const signInSubmit = document.querySelector('#signin-submit');
+const authStatus = document.querySelector('#auth-status');
+const runDemoBtn = document.querySelector('#run-demo');
+
+function setAuthStatus(text, kind) {
+  authStatus.className = 'status' + (kind ? ' ' + kind : '');
+  authStatus.textContent = text;
+}
+
+onAuthState((state) => {
+  chip.dataset.state = state.status;
+  const signedIn = state.status === 'signed_in';
+
+  if (state.status === 'loading') chipLabel.textContent = 'Checking session…';
+  else if (signedIn) chipLabel.textContent = state.user?.email || 'Signed in';
+  else chipLabel.textContent = 'Signed out';
+
+  signOutBtn.hidden = !signedIn;
+  signInForm.hidden = signedIn;
+
+  // The draft write is the only gated control. Connection tests and the store
+  // preview stay usable signed out, so setup is still possible before sign-in.
+  if (runDemoBtn) {
+    runDemoBtn.disabled = !signedIn;
+    runDemoBtn.classList.toggle('locked', !signedIn);
+    runDemoBtn.textContent = signedIn
+      ? 'Validate + create Shopify draft'
+      : 'Sign in to create a Shopify draft';
+  }
+
+  if (state.error) setAuthStatus(state.error, 'error');
+  else if (signedIn) setAuthStatus(`Signed in as ${state.user?.email}. Protected actions unlocked.`, 'ok');
+  else if (state.status === 'link_sent') setAuthStatus('Check your email for the sign-in link, then return here.', 'ok');
+  else if (state.status === 'sending') setAuthStatus('Sending sign-in link…');
+  else setAuthStatus('Not signed in.');
+});
+
+signInForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  signInSubmit.disabled = true;
+  try {
+    await signInWithEmail(signInEmail.value);
+  } catch (error) {
+    setAuthStatus(error instanceof Error ? error.message : 'Sign-in failed.', 'error');
+  } finally {
+    signInSubmit.disabled = false;
+  }
+});
+
+signOutBtn?.addEventListener('click', async () => {
+  signOutBtn.disabled = true;
+  try { await signOut(); } finally { signOutBtn.disabled = false; }
+});
+
+restoreSession();
