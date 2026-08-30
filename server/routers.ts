@@ -4,12 +4,25 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 
-const SHOP_DOMAIN = "fitforgeshop-33574-mc01z.myshopify.com";
-const ADMIN_TOKEN = process.env.SHOP_TOKEN || "";
+const SHOP_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN?.trim() || "";
+const ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN?.trim() || process.env.SHOP_TOKEN?.trim() || "";
+const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION?.trim() || "2025-10";
 
-if (!ADMIN_TOKEN) {
-  console.error('[ERROR] SHOP_TOKEN environment variable is not set!');
-  console.error('[DEBUG] Available env vars:', Object.keys(process.env).filter(k => k.includes('SHOP') || k.includes('TOKEN')).join(', '));
+const PROHIBITED_SHOP_DOMAINS = new Set([
+  "fitforgeshop-33574-mc01z.myshopify.com",
+  "lacedupvfs.myshopify.com",
+]);
+
+function assertShopifyConfigured(): void {
+  if (!SHOP_DOMAIN) {
+    throw new Error("SHOPIFY_STORE_DOMAIN is not configured.");
+  }
+  if (PROHIBITED_SHOP_DOMAINS.has(SHOP_DOMAIN.toLowerCase())) {
+    throw new Error(`Refusing to connect to prohibited Shopify store: ${SHOP_DOMAIN}`);
+  }
+  if (!ADMIN_TOKEN) {
+    throw new Error("SHOPIFY_ADMIN_ACCESS_TOKEN is not configured.");
+  }
 }
 
 // ─── Vendors / product types to exclude from the storefront ─────────────────
@@ -38,7 +51,9 @@ function isMensRelevant(product: { vendor: string; product_type: string; tags: s
 }
 
 async function shopifyFetch(endpoint: string, params: Record<string, string> = {}) {
-  const url = new URL(`https://${SHOP_DOMAIN}/admin/api/2024-01/${endpoint}`);
+  assertShopifyConfigured();
+
+  const url = new URL(`https://${SHOP_DOMAIN}/admin/api/${SHOPIFY_API_VERSION}/${endpoint}`);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
   const res = await fetch(url.toString(), {
@@ -49,7 +64,10 @@ async function shopifyFetch(endpoint: string, params: Record<string, string> = {
   });
 
   if (!res.ok) {
-    throw new Error(`Shopify API error: ${res.status} ${res.statusText}`);
+    const requestId = res.headers.get("x-request-id");
+    throw new Error(
+      `Shopify API error: ${res.status} ${res.statusText}${requestId ? ` (request ${requestId})` : ""}`,
+    );
   }
 
   return res.json();
