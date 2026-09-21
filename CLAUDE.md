@@ -2,13 +2,53 @@
 
 ## Mission
 
-Ship one production-grade VibeFlex POD Studio workflow for 490 Movement, then prove repeatability with a second product, then evolve the same system into a multi-tenant Shopify SaaS.
+Ship one production-grade VibeFlex POD Studio workflow for **Laced Up by
+VibeFlex Sports**, then prove repeatability with a second product, then
+evolve the same system into a multi-tenant Shopify SaaS.
 
-Do not create another backend, storefront, or duplicate Shopify product when the existing canonical systems can be extended.
+Do not create another backend, storefront, or duplicate Shopify product when
+the existing canonical systems can be extended.
 
-## Canonical architecture
+## ⚠️ Two Studio implementations exist — read this before touching either
+
+As of 2026-09-21 there are **two separate VibeFlex Studio codebases**, built
+at different times against different stores. This is not intentional
+architecture — it's the result of two build efforts that were never
+reconciled. Know which one you're in before extending anything.
+
+1. **Legacy: Supabase Edge Functions + GitHub Pages** (documented in the rest
+   of this file below) — `vibeflex-studio-pages/` in this repo, backed by
+   Supabase project `uluyuqrikzicapnezmqd`, targeting store
+   `vibeflex-813.myshopify.com` via Shopify domain `hbipmy-3g.myshopify.com`,
+   using **Printful**. This system has real proven execution history (see
+   "Proven execution state" below) — do not delete it.
+2. **Current: Next.js / Drizzle / Printify** — a separate app,
+   `vibeflex-pod-studio` (not yet pushed to a repo as of this writing),
+   targeting store **`59bf48-92.myshopify.com`** ("Laced Up by VibeFlex
+   Sports" — 328 real orders, 1,487 real customers, the store with actual
+   commercial history), using **Printify** instead of Printful because
+   Printful's product-creation API cannot target a Shopify-connected store.
+
+**`59bf48-92.myshopify.com` is now the one canonical store going forward.**
+`vibeflex-813.myshopify.com` / the `490-movement` tenant is retired as the
+target for new work — it has zero orders and zero customers, and the store
+with real commercial history should not be abandoned in favor of it. The
+Next.js/Printify app is the active build; the Supabase/Printful system below
+is legacy reference, not the thing to extend next. If you're picking up
+Studio work and unsure which codebase applies, it's the Next.js one unless
+told otherwise.
+
+## Canonical architecture (current)
 
 - **GitHub:** code source of truth
+- **Shopify store (canonical, all new work):** `59bf48-92.myshopify.com`
+  ("Laced Up by VibeFlex Sports")
+- **POD provider (canonical, all new work):** Printify
+- **Current Studio codebase:** `vibeflex-pod-studio` (Next.js 15 / Drizzle /
+  Supabase Auth+Storage) — see that repo's own `CLAUDE.md` once pushed.
+
+## Canonical architecture (legacy — Supabase/Printful system, see warning above)
+
 - **Repository:** `daa25/vibeflex-headless`
 - **Default branch:** `main`
 - **Current Studio repair/integration branch:** `claude/vibeos-vibeflex-reconciliation-8jjjg7`
@@ -16,10 +56,10 @@ Do not create another backend, storefront, or duplicate Shopify product when the
 - **Canonical POD runtime:** `uluyuqrikzicapnezmqd` (`vibeflex-printful-automation`)
 - **Canonical POD runtime URL:** `https://uluyuqrikzicapnezmqd.supabase.co`
 - **Shopify API/OAuth domain:** `hbipmy-3g.myshopify.com`
-- **Shopify public domain:** `vibeflex-813.myshopify.com`
+- **Shopify public domain:** `vibeflex-813.myshopify.com` (retired target — see warning above)
 - **Airtable control plane base:** `appuaF1jfeBr2PPqn`
-- **Internal proof tenant:** `490-movement`
-- **First supplier to productionize:** Printful
+- **Internal proof tenant:** `490-movement` (retired — see warning above)
+- **First supplier to productionize:** Printful (superseded by Printify for new work)
 
 ### Runtime reconciliation — RESOLVED
 
